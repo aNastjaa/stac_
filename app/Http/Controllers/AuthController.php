@@ -11,84 +11,68 @@ use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
+
     // Register user
     public function register(Request $request)
     {
         // Validate input fields
         $fields = $request->validate([
-            'username' => [
-                'required',
-                'string',
-                'min:3', // At least 4 characters
-                'max:16', // Maximum 16 characters
-                'regex:/^[\S]+$/', // No spaces allowed
-                'unique:users', // Must not yet exist in the database
-            ],
-            'email' => [
-                'required',
-                'string',
-                'email:rfc,dns', // Must be a valid email format, DNS check included
-                'max:255',
-                'unique:users', // Must not yet exist in the database
-            ],
-            'password' => [
-                'required',
-                'string',
-                'min:8', // At least 8 characters
-                'regex:/[a-z]/', // Must contain at least one lowercase letter
-                'regex:/[A-Z]/', // Must contain at least one uppercase letter
-                'regex:/[0-9]/', // Must contain at least one number
-                'regex:/[\W]/', // Must contain at least one special character
-                'regex:/^\S*$/', // No spaces allowed
-                'confirmed', // Must match the password confirmation field
-            ]
+            'username' => 'required|string|min:3|max:16|regex:/^[\S]+$/|unique:users',
+            'email' => 'required|string|max:255|unique:users',
+            'password' => 'required|string|min:8',
         ]);
 
         // Fetch the 'basic' role UUID
         $basicRoleId = DB::table('roles')->where('name', 'basic')->value('id');
-
-        // Add role_id to fields array
         $fields['role_id'] = $basicRoleId;
 
-        // Create the user with mass assignment
+        // Create the user
         $user = User::create($fields);
+        $token = $user->createToken($request->username);
 
-        //Log in
-        Auth::login($user);
-
-        // Redirect or return a response
-        return redirect()->route('login')->with('success', 'Registration successful! Please log in.');
-
+        return response()->json([
+            'user' => $user,
+            'token' => $token->plainTextToken
+        ], 201);
     }
+
 
     // Login user
 
     public function login(Request $request){
 
         // Validate input fields
-        $fields = $request->validate([
-            'email' => ['required', 'max:255', 'email'],
-            'password' => ['required', 'min:3'],
+        $request->validate([
+            'email' => ['required', 'email', 'exists:users'],
+            'password' => ['required']
         ]);
 
-        if(Auth::attempt($fields, $request->remember)) {
-            return redirect()->intended('profile');
-        } else {
-           return back()->withErrors([
-            'failed' => 'The provided credentials do not match our records'
-           ]);
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json([
+                'message' => 'The provided credentials are incorrect.'
+            ], 401);
         }
+
+        $token = $user->createToken($user->username);
+
+        return response()->json([
+            'user' => $user,
+            'token' => $token
+        ], 200); // Successful login response
+
     }
 
     // Logout
-    public function logout(Request $request){
+    public function logout(Request $request) {
+        // Invalidate all user tokens
+        $request->user()->tokens()->delete();
+
+        // Log out the user from the session if any
         Auth::logout();
 
-        $request->session()->invalidate();
-
-        $request->session()->regenerateToken();
-
-        return redirect('/');
+        return response()->json(['message' => 'You are logged out.']);
     }
 
 }

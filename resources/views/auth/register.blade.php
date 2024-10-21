@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>{{env('APP_NAME')}}</title>
+    <title>Register</title>
 
     <style>
         /* Center the form on the page */
@@ -89,23 +89,14 @@
             <div class="form-group">
                 <label for="username">Username</label>
                 <input type="text" id="username" name="username" value="{{ old('username') }}">
-                @error('username')
-                   <p class="error">{{ $message }}</p>
-                @enderror
             </div>
             <div class="form-group">
                 <label for="email">Email</label>
                 <input type="text" id="email" name="email" value="{{ old('email') }}">
-                @error('email')
-                   <p class="error">{{ $message }}</p>
-                @enderror
             </div>
             <div class="form-group">
                 <label for="password">Password</label>
                 <input type="password" id="password" name="password">
-                @error('password')
-                   <p class="error">{{ $message }}</p>
-                @enderror
             </div>
             <div class="form-group">
                 <label for="password_confirmation">Confirm Password</label>
@@ -115,5 +106,38 @@
 
         </form>
     </div>
+    <script>
+        document.getElementById('registration-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const formData = new FormData(this);
+
+            fetch('{{ route('register') }}', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    return response.json().then(data => {
+                        for (const key in data.errors) {
+                            document.getElementById(`${key}-error`).innerText = data.errors[key].join(', ');
+                        }
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.token) {
+                    // Handle successful registration (e.g., redirect or show success message)
+                    alert('Registration successful! Token: ' + data.token);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    </script>
 </body>
 </html>
