@@ -8,4 +8,5 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::view('/uploads', 'upload')->name('uploads.index');
 

@@ -110,7 +110,7 @@
                 localStorage.setItem('authToken', data.token);
 
                 // Redirect to profile page
-                window.location.href = '/api/users/userprofile';
+                window.location.href = data.redirect_url;
             })
             .catch(error => {
                 // Show error message

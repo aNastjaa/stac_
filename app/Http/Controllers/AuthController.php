@@ -59,7 +59,8 @@ class AuthController extends Controller
 
         return response()->json([
             'user' => $user,
-            'token' => $token
+            'token' => $token,
+            'redirect_url' => '/api/users/userprofile'
         ], 200); // Successful login response
 
     }
