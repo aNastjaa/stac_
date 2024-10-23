@@ -9,22 +9,24 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
-use App\Controllers\UserProfileController;
+use App\Models\UserProfile;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable, HasApiTokens;
 
+    protected $keyType = 'string';
+    public $incrementing = false;
     /**
      * The "booted" method of the model.
      */
     protected static function booted()
     {
         static::creating(function ($user) {
-            // Automatically generate a UUID for the primary key 'id' if not set
+            // UUID for the primary key 'id'
             if (empty($user->id)) {
-                $user->id = Str::uuid();
+                $user->id = (string) Str::uuid();
             }
         });
     }
@@ -56,16 +58,22 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
 
-    public function profile()
-    {
-        return $this->hasOne(UserProfileController::class);
-    }
+
+    // function casts(): array
+    // {
+    //     return [
+    //         'email_verified_at' => 'datetime',
+    //         'password' => 'hashed',
+    //     ];
+    // }
+
+    // public function profile()
+    // {
+    //     return $this->hasOne(UserProfile::class, 'user_id', 'id');
+    // }
 }

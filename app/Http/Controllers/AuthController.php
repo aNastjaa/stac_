@@ -7,44 +7,45 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 
 class AuthController extends Controller
 {
 
     // Register user
+    // Register user
     public function register(Request $request)
     {
-        // Validate input fields
         $fields = $request->validate([
             'username' => 'required|string|min:3|max:16|regex:/^[\S]+$/|unique:users',
             'email' => 'required|string|max:255|unique:users',
             'password' => 'required|string|min:8',
         ]);
 
-        // Fetch the 'basic' role UUID
         $basicRoleId = DB::table('roles')->where('name', 'basic')->value('id');
         $fields['role_id'] = $basicRoleId;
 
         // Create the user
         $user = User::create($fields);
-        $token = $user->createToken($request->username);
+
+        // Create the token for the user
+        $token = $user->createToken($request->username)->plainTextToken;
+
+        Log::info('New User Created:', ['user' => $user->toArray()]);
 
         return response()->json([
             'user' => $user,
-            'token' => $token->plainTextToken
+            'token' => $token,
         ], 201);
     }
 
-
     // Login user
-
-    public function login(Request $request){
-
-        // Validate input fields
+    public function login(Request $request)
+    {
         $request->validate([
             'email' => ['required', 'email', 'exists:users'],
-            'password' => ['required']
+            'password' => ['required'],
         ]);
 
         $user = User::where('email', $request->email)->first();
@@ -55,14 +56,13 @@ class AuthController extends Controller
             ], 401);
         }
 
-        $token = $user->createToken($user->username);
+        $token = $user->createToken($user->username)->plainTextToken;
 
         return response()->json([
             'user' => $user,
             'token' => $token,
-            'redirect_url' => '/api/users/userprofile'
-        ], 200); // Successful login response
-
+            'redirect_url' => '/api/users/profile',
+        ], 200);
     }
 
     // Logout
