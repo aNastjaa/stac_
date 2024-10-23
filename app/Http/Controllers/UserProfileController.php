@@ -12,21 +12,28 @@ use Illuminate\Support\Facades\Log;
 class UserProfileController extends Controller {
 
     public function index(Request $request)
-    {
-        // Ensure the request is authenticated via Sanctum
-        $user = $request->user();
+{
+    // Ensure the request is authenticated via Sanctum
+    $user = $request->user();
 
-        if (!$user) {
-            return response()->json(['message' => 'Unauthorized'], 401);
-        }
-
-        // Retrieve the user's profile
-        $profile = $user->profile;
-
-        return response()->json([
-            'profile' => $profile,
-        ]);
+    if (!$user) {
+        return response()->json(['message' => 'Unauthorized'], 401);
     }
+
+    // Retrieve the user's profile
+    $profile = $user->profile; // Ensure this is set correctly
+
+    // Debugging
+    Log::info('User Profile Retrieval', [
+        'user_id' => $user->id,
+        'profile' => $profile
+    ]);
+
+    return response()->json([
+        'profile' => $profile,
+    ]);
+}
+
 
     public function store(Request $request)
 {

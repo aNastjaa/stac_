@@ -63,17 +63,8 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-
-    // function casts(): array
-    // {
-    //     return [
-    //         'email_verified_at' => 'datetime',
-    //         'password' => 'hashed',
-    //     ];
-    // }
-
-    // public function profile()
-    // {
-    //     return $this->hasOne(UserProfile::class, 'user_id', 'id');
-    // }
+    public function profile()
+    {
+        return $this->hasOne(UserProfile::class, 'user_id', 'id');
+    }
 }
