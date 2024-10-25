@@ -8,6 +8,7 @@ use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash;
@@ -77,4 +78,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/artworks/{id}/likes', [LikeController::class, 'store']);
     Route::get('/artworks/{id}/likes', [LikeController::class, 'index']);
     Route::delete('/likes/{id}', [LikeController::class, 'destroy']);
+
+    //->middleware(RoleMiddleware::class . ':pro'); // Only Pro users can submit
+
+    //Group for admin middleware
+    Route::middleware([RoleMiddleware::class . ':admin'])->group(function () {
+        //Route::post('/admin/create-challenge', [AdminController::class, 'createChallenge']);
+        // Other admin routes...
+    });
 });
