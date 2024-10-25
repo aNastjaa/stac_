@@ -48,4 +48,20 @@ class Post extends Model
     {
         return $this->belongsTo(Theme::class);
     }
+
+     /**
+     * Get the comments associated with the post.
+     */
+    public function comments()
+    {
+        return $this->hasMany(Comment::class);
+    }
+
+    /**
+     * Get the like associated with the post.
+     */
+    public function likes()
+    {
+        return $this->hasMany(Like::class);
+    }
 }

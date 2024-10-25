@@ -6,6 +6,7 @@ use App\Http\Controllers\UploadController;
 use App\Http\Controllers\ThemeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\LikeController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -72,5 +73,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/artworks/{id}/comments', [CommentController::class, 'index']);
     Route::delete('/comments/{id}', [CommentController::class, 'destroy']);
 
-
+//Likes system
+    Route::post('/artworks/{id}/likes', [LikeController::class, 'store']);
+    Route::get('/artworks/{id}/likes', [LikeController::class, 'index']);
+    Route::delete('/likes/{id}', [LikeController::class, 'destroy']);
 });
