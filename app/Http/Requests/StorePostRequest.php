@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateUploadRequest extends FormRequest
+class StorePostRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +22,9 @@ class UpdateUploadRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file' => 'required|file|mimes:jpg,png,jpeg,gif|max:2048',
-            'file_type' => 'required|string|in:avatar,brand_logo',
+
+            'image_url' => 'required|url',
+            'description' => 'required|string',
         ];
     }
 }
