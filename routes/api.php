@@ -5,6 +5,7 @@ use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\UploadController;
 use App\Http\Controllers\ThemeController;
 use App\Http\Controllers\PostController;
+use App\Http\Controllers\CommentController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -46,9 +47,9 @@ Route::middleware('auth:sanctum')->group(function () {
     ->name('uploads.brand-logo');
 
     Route::get('/uploads', [UploadController::class, 'index']);
-    Route::put('/uploads/{upload}', [UploadController::class, 'update'])
+    Route::put('/uploads/{id}', [UploadController::class, 'update'])
     ->name('uploads.update');
-    Route::delete('/uploads/{upload}', [UploadController::class, 'destroy'])
+    Route::delete('/uploads/{id}', [UploadController::class, 'destroy'])
     ->name('uploads.destroy');
 
 //Posts (artworks)
@@ -59,8 +60,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/artworks/{id}', [PostController::class, 'show']);
     Route::delete('/artworks/{id}', [PostController::class, 'destroy']);
 
-// Themes
+// Themes(test routing, in future admin access only)
     Route::get('/themes', [ThemeController::class, 'index']);
     Route::get('/themes/{id}', [ThemeController::class, 'show']);
-    Route::post('/themes', [ThemeController::class, 'store']);
+    Route::post('/themes', [ThemeController::class, 'store']); // 403
+
+//Comments system
+    Route::post('/artworks/{id}/comments', [CommentController::class, 'store']);
+
+    Route::put('/comments/{id}', [CommentController::class, 'update']);
+    Route::get('/artworks/{id}/comments', [CommentController::class, 'index']);
+    Route::delete('/comments/{id}', [CommentController::class, 'destroy']);
+
+
 });
