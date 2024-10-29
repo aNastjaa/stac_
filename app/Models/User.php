@@ -63,16 +63,30 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
+    public function role()
+    {
+        return $this->belongsTo(Role::class);
+    }
+
     public function profile()
     {
         return $this->hasOne(UserProfile::class, 'user_id', 'id');
     }
 
-    /**
-     * Get the posts for the user.
-     */
     public function posts()
     {
         return $this->hasMany(Post::class);
+    }
+
+    // Check if the user has a specific role by role name
+    public function hasRole($roleName)
+    {
+        return $this->role && $this->role->name === $roleName;
+    }
+
+    // Check if the user is an admin by role name
+    public function isAdmin()
+    {
+        return $this->hasRole('admin');
     }
 }

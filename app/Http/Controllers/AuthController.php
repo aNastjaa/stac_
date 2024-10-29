@@ -21,6 +21,7 @@ class AuthController extends Controller
             'username' => 'required|string|min:3|max:16|regex:/^[\S]+$/|unique:users',
             'email' => 'required|string|max:255|unique:users',
             'password' => 'required|string|min:8',
+            //Password rules!!
         ]);
 
         $basicRoleId = DB::table('roles')->where('name', 'basic')->value('id');

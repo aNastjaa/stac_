@@ -4,28 +4,22 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use App\Models\Role;
 
 class RoleMiddleware
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure  $next
-     * @param  string  $role
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function handle(Request $request, Closure $next, string $role): Response
-    {
-        $user = Auth::user();
-
-        // Check if user is authenticated and has the required role
-        if (!$user || $user->role_id !== $role) {
-            return response()->json(['message' => 'Forbidden'], 403);
-        }
-
-        return $next($request);
+    public function handle($request, Closure $next, $role)
+{
+    $user = $request->user();
+    if (!$user || $user->role->name !== $role) {
+        Log::info('User does not have the required role', [
+            'user_id' => $user->id,
+            'role_name' => $user->role->name ?? 'undefined',
+            'expected_role' => $role
+        ]);
+        return response()->json(['error' => 'Forbidden'], 403);
     }
+    return $next($request);
+}
 }

@@ -7,6 +7,7 @@ use App\Http\Controllers\ThemeController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
+use App\Http\Controllers\SponsorChallengeController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\RoleMiddleware;
 use Illuminate\Http\Request;
@@ -80,10 +81,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/likes/{id}', [LikeController::class, 'destroy']);
 
     //->middleware(RoleMiddleware::class . ':pro'); // Only Pro users can submit
-
-    //Group for admin middleware
+    Route::post('/admin/sponsor-challenges', [SponsorChallengeController::class, 'store']); // Create
+//Group for admin middleware
     Route::middleware([RoleMiddleware::class . ':admin'])->group(function () {
-        //Route::post('/admin/create-challenge', [AdminController::class, 'createChallenge']);
-        // Other admin routes...
+
+        Route::put('/admin/sponsor-challenges/{id}', [SponsorChallengeController::class, 'update']); // Update
+        Route::delete('/admin/sponsor-challenges/{id}', [SponsorChallengeController::class, 'destroy']); // Delete
     });
+
+// Non-Admin Sponsor Challenge Routes
+     Route::get('/sponsor-challenges', [SponsorChallengeController::class, 'index']); // List all challenges
+     Route::get('/sponsor-challenges/{id}', [SponsorChallengeController::class, 'show']); // View a specific challenge
 });
