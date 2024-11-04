@@ -29,5 +29,10 @@ class SponsorChallenge extends Model
             }
         });
     }
+
+    public function submissions()
+    {
+        return $this->hasMany(SponsorSubmission::class, 'challenge_id');
+    }
 }
 

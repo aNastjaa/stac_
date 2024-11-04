@@ -9,69 +9,102 @@ use App\Http\Controllers\CommentController;
 use App\Http\Controllers\LikeController;
 use App\Http\Controllers\SponsorChallengeController;
 use App\Http\Controllers\AdminUserController;
+use App\Http\Controllers\SponsorSubmissionController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\RoleMiddleware;
 
-// Existing Auth Routes
-Route::post('/auth/register', [AuthController::class, 'register'])->name('register');
-Route::post('/auth/login', [AuthController::class, 'login'])->name('login');
+// Authentication Routes
+Route::prefix('auth')->group(function () {
+    Route::post('/register', [AuthController::class, 'register'])->name('register');
+    Route::post('/login', [AuthController::class, 'login'])->name('login');
+});
 
+// Authenticated Routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout'])->name('logout');
 
     // User Profile Routes
-    Route::post('/users/profile', [UserProfileController::class, 'store'])->name('profile.create');
-    Route::get('/users/profile', [UserProfileController::class, 'index'])->name('profile.show');
-    Route::put('/users/profile', [UserProfileController::class, 'update'])->name('profile.update');
+    Route::prefix('users')->group(function () {
+        Route::post('/profile', [UserProfileController::class, 'store'])->name('profile.create');
+        Route::get('/profile', [UserProfileController::class, 'index'])->name('profile.show');
+        Route::put('/profile', [UserProfileController::class, 'update'])->name('profile.update');
+    });
 
-    // Uploads Routes
-    Route::post('/uploads/avatar', [UploadController::class, 'uploadAvatar'])->name('uploads.avatar');
-    Route::post('/uploads/brand-logo', [UploadController::class, 'uploadBrandLogo'])->name('uploads.brand-logo');
-    Route::get('/uploads', [UploadController::class, 'index']);
-    Route::put('/uploads/{id}', [UploadController::class, 'update'])->name('uploads.update');
-    Route::delete('/uploads/{id}', [UploadController::class, 'destroy'])->name('uploads.destroy');
+    // Upload Routes
+    Route::prefix('uploads')->group(function () {
+        Route::post('/avatar', [UploadController::class, 'uploadAvatar'])->name('uploads.avatar');
+        Route::post('/brand-logo', [UploadController::class, 'uploadBrandLogo'])->name('uploads.brand-logo');
+        Route::get('/', [UploadController::class, 'index']);
+        Route::get('/{id}', [UploadController::class, 'show']);
+        Route::post('/{id}', [UploadController::class, 'update'])->name('uploads.update');
+        Route::delete('/{id}', [UploadController::class, 'destroy'])->name('uploads.destroy');
+    });
 
     // Artworks (Posts) Routes
-    Route::post('/artworks', [PostController::class, 'store']);
-    Route::put('/artworks/{id}', [PostController::class, 'update']);
-    Route::get('/artworks', [PostController::class, 'index']);
-    Route::get('/artworks/{id}', [PostController::class, 'show']);
-    Route::delete('/artworks/{id}', [PostController::class, 'destroy']);
+    Route::prefix('artworks')->group(function () {
+        Route::post('/', [PostController::class, 'store']);
+        Route::put('/{id}', [PostController::class, 'update']);
+        Route::get('/', [PostController::class, 'index']);
+        Route::get('/{id}', [PostController::class, 'show']);
+        Route::delete('/{id}', [PostController::class, 'destroy']);
+    });
 
-    // Themes Routes
-    Route::get('/themes', [ThemeController::class, 'index']);
-    Route::get('/themes/{id}', [ThemeController::class, 'show']);
-
+    // Theme Routes
+    Route::prefix('themes')->group(function () {
+        Route::get('/', [ThemeController::class, 'index']);
+        Route::get('/{id}', [ThemeController::class, 'show']);
+    });
 
     // Comments Routes
-    Route::post('/artworks/{id}/comments', [CommentController::class, 'store']);
-    Route::put('/comments/{id}', [CommentController::class, 'update']);
-    Route::get('/artworks/{id}/comments', [CommentController::class, 'index']);
-    Route::delete('/comments/{id}', [CommentController::class, 'destroy']);
+    Route::prefix('artworks/{id}/comments')->group(function () {
+        Route::post('/', [CommentController::class, 'store']);
+        Route::put('/{commentId}', [CommentController::class, 'update']);
+        Route::get('/', [CommentController::class, 'index']);
+        Route::delete('/{commentId}', [CommentController::class, 'destroy']);
+    });
 
     // Likes Routes
-    Route::post('/artworks/{id}/likes', [LikeController::class, 'store']);
-    Route::get('/artworks/{id}/likes', [LikeController::class, 'index']);
-    Route::delete('/likes/{id}', [LikeController::class, 'destroy']);
+    Route::prefix('artworks/{id}/likes')->group(function () {
+        Route::post('/', [LikeController::class, 'store']);
+        Route::get('/', [LikeController::class, 'index']);
+        Route::delete('/{likeId}', [LikeController::class, 'destroy']);
+    });
 
-    // Sponsor Challenge Routes
-    Route::get('/sponsor-challenges', [SponsorChallengeController::class, 'index']); // All users can view challenges
-    Route::get('/sponsor-challenges/{id}', [SponsorChallengeController::class, 'show']); // View a specific challenge
+    // Sponsor Challenges and Submissions Routes
+    Route::prefix('sponsor-challenges')->group(function () {
+        Route::get('/', [SponsorChallengeController::class, 'index']);
+        Route::get('/{id}', [SponsorChallengeController::class, 'show']);
 
-    // Group for Admin Management
-    Route::middleware([RoleMiddleware::class . ':admin'])->group(function () {
-        Route::post('/admin/sponsor-challenges', [SponsorChallengeController::class, 'store']); // Admin creates new sponsor challenge
-        Route::put('/admin/sponsor-challenges/{id}', [SponsorChallengeController::class, 'update']); // Admin updates sponsor challenge
-        Route::delete('/admin/sponsor-challenges/{id}', [SponsorChallengeController::class, 'destroy']); // Admin deletes sponsor challenge
+        // Group sponsor submissions within sponsor challenges
+        Route::prefix('{challengeId}/submissions')->group(function () {
+            Route::get('/', [SponsorSubmissionController::class, 'index']);
+            Route::get('/{submissionId}', [SponsorSubmissionController::class, 'show']);
+            Route::post('/', [SponsorSubmissionController::class, 'store'])->middleware('role:pro');
+            Route::put('/{submissionId}', [SponsorSubmissionController::class, 'update'])->middleware('role:pro');
+            Route::delete('/{submissionId}', [SponsorSubmissionController::class, 'destroy'])->middleware('role:pro');
+        });
+    });
 
-        Route::post('/admin/users', [AdminUserController::class, 'create']); // Create new admin user
-        Route::get('/admin/users', [AdminUserController::class, 'index']); // Get all users
-        Route::put('/admin/users/{id}/role', [AdminUserController::class, 'updateRole']); // Update user role
-        Route::delete('/admin/users/{id}', [AdminUserController::class, 'destroy']); // Delete user
+    // Admin Routes
+    Route::middleware(['role:admin'])->prefix('admin')->group(function () {
+        // Sponsor Challenges Management
+        Route::prefix('sponsor-challenges')->group(function () {
+            Route::post('/', [SponsorChallengeController::class, 'store']);
+            Route::put('/{id}', [SponsorChallengeController::class, 'update']);
+            Route::delete('/{id}', [SponsorChallengeController::class, 'destroy']);
+        });
 
-        Route::put('/admin/sponsor-submissions/{id}/status', [SponsorChallengeController::class, 'updateSubmissionStatus']); // Approve/Reject sponsor submissions
-        Route::put('/admin/posts/{id}/status', [PostController::class, 'updatePostStatus']); // Approve/Reject user posts
-        Route::post('/admin/themes', [ThemeController::class, 'store']);// Create new theme
+        // User Management
+        Route::prefix('users')->group(function () {
+            Route::post('/', [AdminUserController::class, 'create']);
+            Route::get('/', [AdminUserController::class, 'index']);
+            Route::put('/{id}/role', [AdminUserController::class, 'updateRole']);
+            Route::delete('/{id}', [AdminUserController::class, 'destroy']);
+        });
+
+        // Approvals and Themes
+        Route::put('sponsor-submissions/{id}/status', [SponsorChallengeController::class, 'updateSubmissionStatus']);
+        Route::put('posts/{id}/status', [PostController::class, 'updatePostStatus']);
+        Route::post('themes', [ThemeController::class, 'store']);
     });
 });
-

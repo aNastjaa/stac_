@@ -85,6 +85,14 @@ class User extends Authenticatable
         return $this->hasMany(Post::class);
     }
 
+     /**
+     * Relationship with Submission model.
+     */
+    public function sponsorSubmissions()
+    {
+        return $this->hasMany(SponsorSubmission::class);
+    }
+
     /**
      * Check if the user has a specific role by role name.
      *
@@ -110,6 +118,11 @@ class User extends Authenticatable
     public function isAdmin()
     {
         return $this->hasRole('admin');
+    }
+
+    public function isPro()
+    {
+        return $this->hasRole('pro');
     }
 
     /**

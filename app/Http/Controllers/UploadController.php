@@ -3,12 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Upload;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreUploadRequest;
 use App\Http\Requests\UpdateUploadRequest;
+use Dotenv\Util\Regex;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Http\JsonResponse;
 
 class UploadController extends Controller
 {
@@ -51,25 +51,27 @@ class UploadController extends Controller
     }
 
     // Update an existing upload
-    public function update(UpdateUploadRequest $request, $uploadId)
-{
-    // Fetch the existing upload by ID
-    $upload = Upload::findOrFail($uploadId);
+    public function update(UpdateUploadRequest $request, $uploadId = null)
+    {
+        // Fetch the existing upload by ID
+        $upload = Upload::findOrFail($uploadId);
 
-    // Handle file upload logic
-    if ($request->hasFile('file')) {
-        // Validate and store the file
-        $path = $request->file('file')->store('uploads', 'public');
-        // Update the upload record with the new file path
-        $upload->file_path = $path; // Assuming you have a 'file_path' column in your uploads table
+        // Handle file upload logic
+        if ($request->hasFile('file')) {
+            // Validate and store the file
+            $path = $request->file('file')->store('uploads', 'public');
+            // Update the upload record with the new file path
+            $upload->file_url = $path;
+
+            // Update other attributes as necessary
+            $upload->file_type = $request->input('file_type');
+            $upload->save();
+
+            return response()->json(['message' => 'Upload updated successfully', 'upload' => $upload], 200);
+        }
+
+        return response()->json(['message' => 'File is missing'], 400);
     }
-
-    // Update other attributes as necessary
-    $upload->file_type = $request->input('file_type');
-    $upload->save();
-
-    return response()->json(['message' => 'Upload updated successfully', 'upload' => $upload], 200);
-}
 
 
     // Delete an upload

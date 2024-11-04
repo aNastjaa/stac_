@@ -13,10 +13,7 @@ class Role extends Model
      // Define the fillable attributes
     protected $fillable = ['name'];
 
-    // Ensure the key type is UUID
     protected $keyType = 'string';
-
-    // Disable auto-incrementing
     public $incrementing = false;
 
     protected static function booted()

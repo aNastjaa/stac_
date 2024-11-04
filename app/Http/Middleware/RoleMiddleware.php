@@ -4,9 +4,8 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
-use App\Models\Role;
+use App\Models\User;
 
 class RoleMiddleware
 {
@@ -14,14 +13,10 @@ class RoleMiddleware
     {
         Log::info('RoleMiddleware handling request for route', ['route' => $request->getPathInfo()]);
 
-        $user = $request->user()->load('role');
+        /** @var User $user */
+        $user = $request->user()->load('Role');
 
         Log::info('Checking user role', ['user_id' => $user->id ?? 'N/A']);
-
-        if (!$user || !$user->role) {
-            Log::warning('User not authenticated or role not found', ['user_id' => $user->id ?? 'N/A']);
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
 
         if ($user->hasRole($role)) {
             Log::info('User has the required role, proceeding to controller');
@@ -36,5 +31,4 @@ class RoleMiddleware
 
         return response()->json(['error' => 'Unauthorized'], 403);
     }
-
 }

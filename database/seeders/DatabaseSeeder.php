@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
         //$this->call(RolesTableSeeder::class);
 
         // Call the ThemeSeeder to create a default theme
-        $this->call(ThemeSeeder::class);
+        //$this->call(ThemeSeeder::class);
+
+        $this->call(ProUserSeeder::class);
     }
 }
