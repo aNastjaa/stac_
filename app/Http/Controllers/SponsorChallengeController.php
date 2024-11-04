@@ -8,14 +8,23 @@ use App\Models\SponsorChallenge;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Http\Request;
+
 
 class SponsorChallengeController extends Controller
 {
+
+    public function __construct()
+{
+    Log::info('SponsorChallengeController instantiated');
+}
+
     /**
      * Display a listing of the sponsor challenges.
      */
     public function index(): JsonResponse
     {
+        Log::info('SponsorChallengeController@index called');
         $challenges = SponsorChallenge::all();
         return response()->json($challenges);
     }
@@ -25,14 +34,18 @@ class SponsorChallengeController extends Controller
      */
     public function store(StoreSponsorChallengeRequest $request): JsonResponse
     {
-        Log::info('Store Sponsor Challenge request received', $request->all());
+        Log::info('Inside store method of SponsorChallengeController');
+        Log::info('Store Sponsor Challenge request received', $request->validated());
+
         // Check if the user is an admin
         if (Auth::user()->role->name !== 'admin') {
+            Log::warning('Unauthorized access attempt to store sponsor challenge', ['user_id' => Auth::id()]);
             return response()->json(['message' => 'Unauthorized.'], 403);
         }
 
-        // Create a new sponsor challenge
+        // Create the new sponsor challenge
         $challenge = SponsorChallenge::create($request->validated());
+        Log::info('Sponsor Challenge created successfully', ['challenge_id' => $challenge->id]);
 
         return response()->json($challenge, 201);
     }
@@ -40,25 +53,39 @@ class SponsorChallengeController extends Controller
     /**
      * Display the specified sponsor challenge.
      */
-    public function show(SponsorChallenge $sponsorChallenge): JsonResponse
+    public function show($id): JsonResponse
     {
+        $sponsorChallenge = SponsorChallenge::find($id);
+
+        if (!$sponsorChallenge) {
+            Log::warning('Sponsor challenge not found', ['challenge_id' => $id]);
+            return response()->json(['message' => 'Sponsor challenge not found.'], 404);
+        }
+
         return response()->json($sponsorChallenge);
     }
+
 
     /**
      * Update the specified sponsor challenge (Admin only).
      */
-    public function update(UpdateSponsorChallengeRequest $request, SponsorChallenge $sponsorChallenge): JsonResponse
+    public function update(UpdateSponsorChallengeRequest $request, $id)
     {
-        // Check if the user is an admin
-        if (Auth::user()->role->name !== 'admin') {
-            return response()->json(['message' => 'Unauthorized.'], 403);
+
+        // Attempt to retrieve the SponsorChallenge by ID
+        $sponsorChallenge = SponsorChallenge::find($id);
+
+        // Check if the SponsorChallenge was found
+        if (!$sponsorChallenge) {
+            Log::warning('Sponsor Challenge not found', ['id' => $id]);
+            return response()->json(['message' => 'Sponsor Challenge not found'], 404);
         }
 
-        // Update the sponsor challenge with validated data
-        $sponsorChallenge->update($request->validated());
+        // Validate and update the SponsorChallenge
+        $validatedData = $request->validated();
+        $sponsorChallenge->update($validatedData);
 
-        return response()->json($sponsorChallenge);
+        return response()->json($sponsorChallenge, 200);
     }
 
     /**

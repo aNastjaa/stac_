@@ -10,6 +10,7 @@ class Role extends Model
 {
     use HasFactory;
 
+     // Define the fillable attributes
     protected $fillable = ['name'];
 
     // Ensure the key type is UUID
@@ -26,5 +27,10 @@ class Role extends Model
                 $role->id = (string) Str::uuid();
             }
         });
+    }
+
+    public function users()
+    {
+        return $this->hasMany(User::class);
     }
 }

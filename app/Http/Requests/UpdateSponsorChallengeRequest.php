@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class UpdateSponsorChallengeRequest extends FormRequest
 {
@@ -12,6 +13,7 @@ class UpdateSponsorChallengeRequest extends FormRequest
      */
     public function authorize(): bool
     {
+        Log::info('Authorize method called', ['user_id' => Auth::id()]);
         return Auth::user()->role->name === 'admin';
     }
 
@@ -23,11 +25,11 @@ class UpdateSponsorChallengeRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title' => 'string|max:255',
-            'brief' => 'string',
-            'brand_name' => 'string|max:255',
-            'brand_logo_id' => 'uuid|exists:uploads,id',
-            'submission_deadline' => 'date',
+            'title' => 'nullable|string|max:255',
+            'brief' => 'nullable|string',
+            'brand_name' => 'nullable|string|max:255',
+            'brand_logo_id' => 'nullable|uuid|exists:uploads,id',
+            'submission_deadline' => 'nullable|date_format:Y-m-d H:i:s',
         ];
     }
 }
