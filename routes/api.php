@@ -10,6 +10,7 @@ use App\Http\Controllers\LikeController;
 use App\Http\Controllers\SponsorChallengeController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\SponsorSubmissionController;
+use App\Http\Controllers\VoteController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\RoleMiddleware;
 
@@ -82,6 +83,13 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/', [SponsorSubmissionController::class, 'store'])->middleware('role:pro');
             Route::put('/{submissionId}', [SponsorSubmissionController::class, 'update'])->middleware('role:pro');
             Route::delete('/{submissionId}', [SponsorSubmissionController::class, 'destroy'])->middleware('role:pro');
+
+            // Voting Routes for Sponsor Submissions
+            Route::prefix('{submissionId}/votes')->group(function () {
+                Route::post('/', [VoteController::class, 'store'])->name('votes.store');  // Store a vote
+                Route::get('/', [VoteController::class, 'index'])->name('votes.index');   // Get all votes for a submission
+                Route::delete('/', [VoteController::class, 'destroy'])->name('votes.destroy'); // Delete a vote
+            });
         });
     });
 
