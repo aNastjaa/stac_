@@ -11,6 +11,7 @@ use App\Http\Controllers\SponsorChallengeController;
 use App\Http\Controllers\AdminUserController;
 use App\Http\Controllers\SponsorSubmissionController;
 use App\Http\Controllers\VoteController;
+use App\Http\Controllers\ArchiveController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Middleware\RoleMiddleware;
 
@@ -91,6 +92,11 @@ Route::middleware('auth:sanctum')->group(function () {
                 Route::delete('/', [VoteController::class, 'destroy'])->name('votes.destroy'); // Delete a vote
             });
         });
+    });
+
+    Route::prefix('archive')->group(function () {
+        Route::post('/move', [ArchiveController::class, 'moveToArchive'])->middleware('role:admin'); // Only admin can move posts
+        Route::get('/posts', [ArchiveController::class, 'viewArchivedPosts']); // Accessible to all users
     });
 
     // Admin Routes

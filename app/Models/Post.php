@@ -64,4 +64,12 @@ class Post extends Model
     {
         return $this->hasMany(Like::class);
     }
+    /**
+     * Move post to archive.
+     */
+    public function archive()
+    {
+        return $this->hasOne(Archive::class);
+    }
+
 }
