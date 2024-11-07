@@ -15,6 +15,7 @@ class Post extends Model
         'theme_id',
         'image_url',
         'description',
+        'status',
     ];
 
     protected $keyType = 'string'; // Set the key type to string
@@ -29,6 +30,7 @@ class Post extends Model
             // UUID for the primary key 'id'
             if (empty($post->id)) {
                 $post->id = (string) Str::uuid();
+                $post->status = 'pending';
             }
         });
     }

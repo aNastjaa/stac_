@@ -2,49 +2,85 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AdminUser;
+use App\Models\Admin;
+use App\Models\Role;
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class AdminUserController extends Controller
 {
-    // // Create a new admin user
-    // public function create(Request $request)
-    // {
-    //     $request->validate([
-    //         'name' => 'required|string|max:255',
-    //         'email' => 'required|string|email|max:255|unique:admin_users',
-    //         'password' => 'required|string|min:8',
-    //     ]);
+    public function create(Request $request)
+{
+    $validator = Validator::make($request->all(), [
+        'username' => 'required|string|max:255|unique:users',
+        'email' => 'required|string|email|max:255|unique:users',
+        'password' => 'required|string|min:8',
+        'role' => 'sometimes|string|in:basic,pro,admin',
+        'role_id' => 'sometimes|uuid|exists:roles,id',
+    ]);
 
-    //     $adminUser = AdminUser::create([
-    //         'name' => $request->name,
-    //         'email' => $request->email,
-    //         'password' => Hash::make($request->password),
-    //     ]);
+    if ($validator->fails()) {
+        return response()->json(['errors' => $validator->errors()], 422);
+    }
 
-    //     return response()->json($adminUser, 201);
-    // }
+    // Fetch the role ID either by direct `role_id` or by `role` name
+    $roleId = $request->has('role_id')
+        ? $request->input('role_id')
+        : Role::where('name', $request->input('role'))->value('id');
 
-    // // Get all admin users
-    // public function index()
-    // {
-    //     return AdminUser::all();
-    // }
+    if (!$roleId) {
+        return response()->json(['error' => 'Role not found.'], 404);
+    }
 
-    // // Update user role
-    // public function updateRole(Request $request, $id)
-    // {
-    //     $user = AdminUser::findOrFail($id);
-    //     // Update user role logic here if applicable
-    //     return response()->json($user, 200);
-    // }
+    $user = User::create([
+        'username' => $request->input('username'),
+        'email' => $request->input('email'),
+        'password' => bcrypt($request->input('password')),
+        'role_id' => $roleId,
+    ]);
 
-    // // Delete user
-    // public function destroy($id)
-    // {
-    //     $user = AdminUser::findOrFail($id);
-    //     $user->delete();
-    //     return response()->json(null, 204);
-    // }
+    return response()->json(['user' => $user], 201);
+}
+
+    public function index(): JsonResponse
+    {
+        $users = User::with('role')->get();
+        return response()->json($users);
+    }
+
+    public function updateRole(Request $request, $id): JsonResponse
+{
+    $validator = Validator::make($request->all(), [
+        'role' => 'required|string|in:basic,pro,admin',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['errors' => $validator->errors()], 422);
+    }
+
+    $user = User::findOrFail($id);
+
+    // Fetch the role ID based on the role name from the request
+    $role = Role::where('name', $request->role)->first();
+
+    if (!$role) {
+        return response()->json(['error' => 'Role not found.'], 404);
+    }
+
+    // Update the user's role_id directly
+    $user->role_id = $role->id;
+    $user->save();
+
+    return response()->json(['message' => 'User role updated successfully', 'user' => $user]);
+}
+
+    public function destroy($id): JsonResponse
+    {
+        $user = User::findOrFail($id);
+        Admin::deleteUser($user);
+
+        return response()->json(['message' => 'User deleted successfully.']);
+    }
 }

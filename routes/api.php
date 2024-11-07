@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AdminSubmissionController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\UserProfileController;
 use App\Http\Controllers\UploadController;
@@ -87,9 +88,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
             // Voting Routes for Sponsor Submissions
             Route::prefix('{submissionId}/votes')->group(function () {
-                Route::post('/', [VoteController::class, 'store'])->name('votes.store');  // Store a vote
-                Route::get('/', [VoteController::class, 'index'])->name('votes.index');   // Get all votes for a submission
-                Route::delete('/', [VoteController::class, 'destroy'])->name('votes.destroy'); // Delete a vote
+                Route::post('/', [VoteController::class, 'store'])->name('votes.store');
+                Route::get('/', [VoteController::class, 'index'])->name('votes.index');
+                Route::delete('/', [VoteController::class, 'destroy'])->name('votes.destroy');
             });
         });
     });
@@ -116,9 +117,16 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::delete('/{id}', [AdminUserController::class, 'destroy']);
         });
 
-        // Approvals and Themes
-        Route::put('sponsor-submissions/{id}/status', [SponsorChallengeController::class, 'updateSubmissionStatus']);
-        Route::put('posts/{id}/status', [PostController::class, 'updatePostStatus']);
-        Route::post('themes', [ThemeController::class, 'store']);
+    // Approvals and Themes
+    Route::put('posts/{id}/status', [AdminSubmissionController::class, 'updatePostStatus']);
+    Route::put('sponsor-submissions/{id}/status', [AdminSubmissionController::class, 'updateSubmissionStatus']);
+
+    Route::get('pending-posts', [AdminSubmissionController::class, 'viewPendingPosts']);
+    Route::get('pending-submissions', [AdminSubmissionController::class, 'viewPendingSubmissions']);
+
+    Route::post('themes', [ThemeController::class, 'store']);
+    Route::put('themes/{id}', [ThemeController::class, 'update']);
+    Route::delete('themes/{id}', [ThemeController::class, 'destroy']);
+
     });
 });

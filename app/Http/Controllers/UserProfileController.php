@@ -65,8 +65,6 @@ class UserProfileController extends Controller {
 
         return response()->json($profile, 201);
     } catch (\Exception $e) {
-        // Log any errors for further debugging
-        Log::error('Error creating user profile:', ['error' => $e->getMessage()]);
         return response()->json(['message' => 'Error creating profile'], 500);
     }
 }

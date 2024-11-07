@@ -14,7 +14,9 @@ class SponsorSubmission extends Model
      'user_id',
      'challenge_id',
      'image_url',
-     'description'];
+     'description',
+     'status',
+    ];
 
     protected $keyType = 'string';
     public $incrementing = false;
@@ -23,6 +25,7 @@ class SponsorSubmission extends Model
     {
         static::creating(function ($submission) {
             $submission->id = (string) Str::uuid();
+            $submission->status = 'pending';
         });
     }
 

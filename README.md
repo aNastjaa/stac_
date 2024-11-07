@@ -1,66 +1,202 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# STAC
 
-## About Laravel
+**STAC** is a creative platform that provides artists with a unique space to showcase their artwork through monthly themes and sponsor collaborations. Inspired by platforms like **Behance**, **Dribbble**, and **Pinterest**, STAC emphasizes monthly thematic challenges to inspire creativity and engage users in sponsor-sponsored challenges.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Table of Contents
+1. [Requirements](#requirements)
+2. [Installation](#installation)
+3. [Usage](#usage)
+4. [API Endpoints](#api-endpoints)
+5. [Role-Based Access](#role-based-access)
+6. [Testing with Postman](#testing-with-postman)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Requirements
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- PHP 8.3.11
+- Laravel 11.23.5
+- Composer
+- MySQL
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Installation
 
-## Laravel Sponsors
+1. Clone the repository:
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+   ```bash
+   git clone https://github.com/aNastjaa/stac.git
+   ```
 
-### Premium Partners
+2. Install dependencies:
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
+   ```bash
+   cd stac
+   composer install
+   ```
 
-## Contributing
+3. Copy `.env.example` to `.env`:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+   ```bash
+   cp .env.example .env
+   ```
 
-## Code of Conduct
+4. Generate the application key:
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+   ```bash
+   php artisan key:generate
+   ```
 
-## Security Vulnerabilities
+5. Configure your database in `.env` and run migrations:
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+   ```bash
+   php artisan migrate --seed
+   ```
+
+6. Start the server:
+
+   ```bash
+   php artisan serve
+   ```
+
+---
+
+## Usage
+
+1. **Register and Login**: Register a new user or log in with existing credentials.
+2. **User Profile**: Manage user profile details.
+3. **Upload Avatars/Brand Logos**: Upload user avatars and sponsor brand logos.
+4. **Artworks**: Users can create, view, edit, and delete their artwork submissions.
+5. **Sponsor Challenges**: Access sponsor challenges, submit artwork, and vote on other submissions.
+6. **Admin Dashboard**: Admins manage user roles, submissions, themes, and more.
+
+---
+
+## API Endpoints
+
+### Authentication Routes
+
+- **POST** `/auth/register` - Register a new user.
+- **POST** `/auth/login` - User login.
+
+### Authenticated Routes (Require `auth:sanctum` middleware)
+
+#### Authentication
+
+- **POST** `/auth/logout` - Logout the user.
+
+#### User Profile
+
+- **POST** `/users/profile` - Create user profile.
+- **GET** `/users/profile` - View user profile.
+- **PUT** `/users/profile` - Update user profile.
+
+#### Uploads
+
+- **POST** `/uploads/avatar` - Upload a user's avatar.
+- **POST** `/uploads/brand-logo` - Upload a brand logo.
+- **GET** `/uploads` - View all uploads.
+- **GET** `/uploads/{id}` - View a specific upload.
+- **POST** `/uploads/{id}` - Update a specific upload.
+- **DELETE** `/uploads/{id}` - Delete a specific upload.
+
+#### Artworks (Posts)
+
+- **POST** `/artworks` - Create a new artwork post.
+- **PUT** `/artworks/{id}` - Update an artwork post.
+- **GET** `/artworks` - View all artworks.
+- **GET** `/artworks/{id}` - View a specific artwork.
+- **DELETE** `/artworks/{id}` - Delete an artwork.
+
+#### Theme
+
+- **GET** `/themes` - View all themes.
+- **GET** `/themes/{id}` - View a specific theme.
+
+#### Comments
+
+- **POST** `/artworks/{id}/comments` - Add a comment to an artwork.
+- **PUT** `/artworks/{id}/comments/{commentId}` - Update a comment.
+- **GET** `/artworks/{id}/comments` - View comments on an artwork.
+- **DELETE** `/artworks/{id}/comments/{commentId}` - Delete a comment.
+
+#### Likes
+
+- **POST** `/artworks/{id}/likes` - Add a like to an artwork.
+- **GET** `/artworks/{id}/likes` - View likes on an artwork.
+- **DELETE** `/artworks/{id}/likes/{likeId}` - Remove a like.
+
+#### Sponsor Challenges and Submissions
+
+- **GET** `/sponsor-challenges` - View all sponsor challenges.
+- **GET** `/sponsor-challenges/{id}` - View a specific sponsor challenge.
+
+**Within Sponsor Challenges**
+
+- **POST** `/sponsor-challenges/{challengeId}/submissions` - Submit artwork to a challenge (Pro users only).
+- **GET** `/sponsor-challenges/{challengeId}/submissions` - View all submissions for a challenge.
+- **GET** `/sponsor-challenges/{challengeId}/submissions/{submissionId}` - View a specific submission.
+- **PUT** `/sponsor-challenges/{challengeId}/submissions/{submissionId}` - Update a submission (Pro users only).
+- **DELETE** `/sponsor-challenges/{challengeId}/submissions/{submissionId}` - Delete a submission (Pro users only).
+
+**Voting**
+
+- **POST** `/sponsor-challenges/{challengeId}/submissions/{submissionId}/votes` - Vote on a submission.
+- **GET** `/sponsor-challenges/{challengeId}/submissions/{submissionId}/votes` - View votes on a submission.
+- **DELETE** `/sponsor-challenges/{challengeId}/submissions/{submissionId}/votes` - Remove a vote.
+
+#### Archive
+
+- **POST** `/archive/move` - Move artworks to the archive (Admin only).
+- **GET** `/archive/posts` - View archived posts.
+
+#### Admin Dashboard (Require `role:admin` middleware)
+
+- **POST** `/admin/sponsor-challenges` - Create a new sponsor challenge.
+- **PUT** `/admin/sponsor-challenges/{id}` - Update a sponsor challenge.
+- **DELETE** `/admin/sponsor-challenges/{id}` - Delete a sponsor challenge.
+
+**User Management**
+
+- **POST** `/admin/users` - Create a new user.
+- **GET** `/admin/users` - View all users.
+- **PUT** `/admin/users/{id}/role` - Update user role.
+- **DELETE** `/admin/users/{id}` - Delete a user.
+
+**Approvals and Themes**
+
+- **PUT** `/admin/posts/{id}/status` - Approve/reject a post.
+- **PUT** `/admin/sponsor-submissions/{id}/status` - Approve/reject a submission.
+- **GET** `/admin/pending-posts` - View pending posts.
+- **GET** `/admin/pending-submissions` - View pending submissions.
+- **POST** `/admin/themes` - Create a theme.
+- **PUT** `/admin/themes/{id}` - Update a theme.
+- **DELETE** `/admin/themes/{id}` - Delete a theme.
+
+---
+
+## Role-Based Access
+
+The project defines three roles:
+
+- **Basic Users**: Can view and interact with all artworks, vote in challenges, and submit artwork for monthly themes.
+- **Pro Users**: Have all basic permissions and can submit to sponsor challenges, link external portfolios, and view voting results.
+- **Admins**: Full access to all features, including user management, content approval, and theme management.
+
+---
+
+## Testing with Postman
+
+1. Open Postman and click on `Import`.
+2. Choose `Export` in Postman and save the collection as a `.json` file.
+3. Import the `.json` file into Postman to use pre-configured endpoints.
+
+---
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+This project is licensed under the MIT License.

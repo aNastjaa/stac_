@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Theme;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
 class ThemeController extends Controller
 {
@@ -31,7 +32,61 @@ class ThemeController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
-        // Return a message that themes can only be created by an admin
-        return response()->json(['message' => 'Themes can only be created by admin.'], 403);
+        // Validate incoming request
+        $validator = Validator::make($request->all(), [
+            'theme_name' => 'required|string|max:255',
+            'start_date' => 'required|date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        // Create a new theme
+        $theme = Theme::create([
+            'theme_name' => $request->theme_name,
+            'start_date' => $request->start_date,
+        ]);
+
+        return response()->json($theme, 201);
+    }
+
+    /**
+     * Update the specified theme in storage.
+     */
+    public function update(Request $request, $id): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'theme_name' => 'sometimes|required|string|max:255',
+            'start_date' => 'sometimes|required|date',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $theme = Theme::findOrFail($id);
+
+        if ($request->has('theme_name')) {
+            $theme->theme_name = $request->theme_name;
+        }
+        if ($request->has('start_date')) {
+            $theme->start_date = $request->start_date;
+        }
+
+        $theme->save();
+
+        return response()->json(['message' => 'Theme updated successfully.', 'theme' => $theme]);
+    }
+
+    /**
+     * Remove the specified theme from storage.
+     */
+    public function destroy($id): JsonResponse
+    {
+        $theme = Theme::findOrFail($id);
+        $theme->delete();
+
+        return response()->json(['message' => 'Theme deleted successfully.']);
     }
 }
