@@ -21,18 +21,24 @@ class SponsorChallenge extends Model
     protected $keyType = 'string';
     public $incrementing = false;
 
-    protected static function booted()
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
     {
         static::creating(function ($challenge) {
-            if (empty($challenge->id)) {
+            // Generate a UUID for the primary key 'id' if it's not already set
+            if (!$challenge->id) {
                 $challenge->id = (string) Str::uuid();
             }
         });
     }
 
+    /**
+     * Get the submissions associated with the challenge.
+     */
     public function submissions()
     {
         return $this->hasMany(SponsorSubmission::class, 'challenge_id');
     }
 }
-

@@ -14,10 +14,10 @@ class AdminSubmissionController extends Controller
      * Update the status of a post (approve/reject).
      *
      * @param Request $request
-     * @param int $id
+     * @param string $postId
      * @return JsonResponse
      */
-    public function updatePostStatus(Request $request, int $id): JsonResponse
+    public function updatePostStatus(Request $request, string $postId): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'status' => 'required|string|in:accepted,rejected',
@@ -27,7 +27,7 @@ class AdminSubmissionController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $post = Post::findOrFail($id);
+        $post = Post::findOrFail($postId);
         $post->status = $request->status;
         $post->save();
 
@@ -42,10 +42,10 @@ class AdminSubmissionController extends Controller
      * Update the status of a sponsor submission (approve/reject).
      *
      * @param Request $request
-     * @param int $id
+     * @param string $submissionId
      * @return JsonResponse
      */
-    public function updateSubmissionStatus(Request $request, int $id): JsonResponse
+    public function updateSubmissionStatus(Request $request, string $submissionId): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'status' => 'required|string|in:accepted,rejected',
@@ -55,7 +55,7 @@ class AdminSubmissionController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $submission = SponsorSubmission::findOrFail($id);
+        $submission = SponsorSubmission::findOrFail($submissionId);
         $submission->status = $request->status;
         $submission->save();
 

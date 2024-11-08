@@ -15,13 +15,20 @@ class Like extends Model
         'post_id',
     ];
 
-    protected $keyType = 'string';
+    // Set incrementing to false to use UUIDs
     public $incrementing = false;
 
-    protected static function booted()
+    // Set the key type to string for UUIDs
+    protected $keyType = 'string';
+
+    /**
+     * The "booted" method of the model.
+     */
+    protected static function booted(): void
     {
         static::creating(function ($like) {
-            if (empty($like->id)) {
+            // Generate a UUID for the primary key 'id' if it's not already set
+            if (!$like->id) {
                 $like->id = (string) Str::uuid();
             }
         });

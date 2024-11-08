@@ -5,6 +5,8 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
+use App\Models\User;
+use App\Models\Post;
 
 class Comment extends Model
 {
@@ -25,22 +27,32 @@ class Comment extends Model
     /**
      * The "booted" method of the model.
      */
-    protected static function booted()
+    protected static function booted(): void
     {
         static::creating(function ($comment) {
             // Generate a UUID for the primary key 'id' if it's not already set
-            if (empty($comment->id)) {
+            if (!$comment->id) {
                 $comment->id = (string) Str::uuid();
             }
         });
     }
 
-    public function user()
+    /**
+     * Define the relationship to the User model
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    public function post()
+    /**
+     * Define the relationship to the Post model
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function post(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Post::class);
     }

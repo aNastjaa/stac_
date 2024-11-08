@@ -11,6 +11,8 @@ class ThemeController extends Controller
 {
     /**
      * Display a listing of the themes.
+     *
+     * @return JsonResponse
      */
     public function index(): JsonResponse
     {
@@ -20,15 +22,21 @@ class ThemeController extends Controller
 
     /**
      * Display the specified theme.
+     *
+     * @param  string  $themeId
+     * @return JsonResponse
      */
-    public function show($id): JsonResponse
+    public function show(string $themeId): JsonResponse
     {
-        $theme = Theme::findOrFail($id);
+        $theme = Theme::findOrFail($themeId);
         return response()->json($theme);
     }
 
     /**
      * Store a newly created theme in storage (for future use).
+     *
+     * @param  Request  $request
+     * @return JsonResponse
      */
     public function store(Request $request): JsonResponse
     {
@@ -53,8 +61,12 @@ class ThemeController extends Controller
 
     /**
      * Update the specified theme in storage.
+     *
+     * @param  Request  $request
+     * @param  string  $themeId
+     * @return JsonResponse
      */
-    public function update(Request $request, $id): JsonResponse
+    public function update(Request $request, string $themeId): JsonResponse
     {
         $validator = Validator::make($request->all(), [
             'theme_name' => 'sometimes|required|string|max:255',
@@ -65,7 +77,7 @@ class ThemeController extends Controller
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
-        $theme = Theme::findOrFail($id);
+        $theme = Theme::findOrFail($themeId);
 
         if ($request->has('theme_name')) {
             $theme->theme_name = $request->theme_name;
@@ -81,10 +93,13 @@ class ThemeController extends Controller
 
     /**
      * Remove the specified theme from storage.
+     *
+     * @param  string  $themeId
+     * @return JsonResponse
      */
-    public function destroy($id): JsonResponse
+    public function destroy(string $themeId): JsonResponse
     {
-        $theme = Theme::findOrFail($id);
+        $theme = Theme::findOrFail($themeId);
         $theme->delete();
 
         return response()->json(['message' => 'Theme deleted successfully.']);

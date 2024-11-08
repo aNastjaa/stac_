@@ -4,49 +4,43 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreSponsorSubmissionRequest;
 use App\Http\Requests\UpdateSponsorSubmissionRequest;
-use App\Models\SponsorChallenge;
 use App\Models\SponsorSubmission;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 
 class SponsorSubmissionController extends Controller
 {
     /**
      * Display a listing of the resource.
+     *
+     * @param  string  $challengeId
+     * @return JsonResponse
      */
-    public function index($challengeId)
+    public function index(string $challengeId): JsonResponse
     {
-        Log::info('Fetching submissions for sponsor challenge', ['challenge_id' => $challengeId]);
-
         try {
             $submissions = SponsorSubmission::where('challenge_id', $challengeId)
                 ->with('user')
                 ->get();
 
-            Log::info('Fetched all submissions', ['submissions' => $submissions]);
-
             return response()->json($submissions);
         } catch (\Exception $e) {
-            Log::error('Error fetching submissions', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Failed to fetch submissions'], 500);
         }
     }
 
     /**
      * Store a newly created resource in storage.
+     *
+     * @param  StoreSponsorSubmissionRequest  $request
+     * @param  string  $challengeId
+     * @return JsonResponse
      */
-    public function store(StoreSponsorSubmissionRequest $request, $challengeId)
+    public function store(StoreSponsorSubmissionRequest $request, string $challengeId): JsonResponse
     {
-        Log::info('Store method called', [
-            'challenge_id' => $challengeId,
-            'user_id' => Auth::id(),
-            'request_data' => $request->all(),
-        ]);
-
         try {
             $user = Auth::user();
             if (!$user) {
-                Log::warning('User not authenticated when trying to submit', ['challenge_id' => $challengeId]);
                 return response()->json(['error' => 'Unauthorized'], 401);
             }
 
@@ -57,45 +51,43 @@ class SponsorSubmissionController extends Controller
                 'description' => $request->input('description'),
             ]);
 
-            Log::info('Submission created successfully', ['submission_id' => $submission->id]);
-
             return response()->json($submission, 201);
         } catch (\Exception $e) {
-            Log::error('Error creating submission', [
-                'error' => $e->getMessage(),
-                'challenge_id' => $challengeId,
-                'user_id' => Auth::id(),
-            ]);
             return response()->json(['error' => 'Failed to create submission'], 500);
         }
     }
 
     /**
      * Display the specified resource.
+     *
+     * @param  string  $challengeId
+     * @param  string  $submissionId
+     * @return JsonResponse
      */
-    public function show($challengeId, $submissionId)
+    public function show(string $challengeId, string $submissionId): JsonResponse
     {
-        Log::info('Fetching specific sponsor submission', ['challenge_id' => $challengeId, 'submission_id' => $submissionId]);
-
         try {
-            $submission = SponsorSubmission::with('user', 'sponsorChallenge')->where([
-                ['id', '=', $submissionId],
-                ['challenge_id', '=', $challengeId]
-            ])->firstOrFail();
-
-            Log::info('Fetched specific sponsor submission', ['submission_id' => $submissionId]);
+            $submission = SponsorSubmission::with('user', 'sponsorChallenge')
+                ->where([
+                    ['id', '=', $submissionId],
+                    ['challenge_id', '=', $challengeId]
+                ])->firstOrFail();
 
             return response()->json($submission);
         } catch (\Exception $e) {
-            Log::error('Error fetching submission', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Submission not found'], 404);
         }
     }
 
     /**
      * Update the specified resource in storage.
+     *
+     * @param  UpdateSponsorSubmissionRequest  $request
+     * @param  string  $challengeId
+     * @param  string  $submissionId
+     * @return JsonResponse
      */
-    public function update(UpdateSponsorSubmissionRequest $request, $challengeId, $submissionId)
+    public function update(UpdateSponsorSubmissionRequest $request, string $challengeId, string $submissionId): JsonResponse
     {
         try {
             $submission = SponsorSubmission::where([
@@ -105,19 +97,20 @@ class SponsorSubmissionController extends Controller
 
             $submission->update($request->only(['image_url', 'description']));
 
-            Log::info('Submission updated successfully', ['submission_id' => $submissionId]);
-
             return response()->json($submission, 200);
         } catch (\Exception $e) {
-            Log::error('Error updating submission', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Submission not found'], 404);
         }
     }
 
     /**
      * Remove the specified resource from storage.
+     *
+     * @param  string  $challengeId
+     * @param  string  $submissionId
+     * @return JsonResponse
      */
-    public function destroy($challengeId, $submissionId)
+    public function destroy(string $challengeId, string $submissionId): JsonResponse
     {
         try {
             $submission = SponsorSubmission::where([
@@ -127,11 +120,8 @@ class SponsorSubmissionController extends Controller
 
             $submission->delete();
 
-            Log::info('Submission deleted successfully', ['submission_id' => $submissionId]);
-
             return response()->json(['message' => 'Submission deleted successfully'], 200);
         } catch (\Exception $e) {
-            Log::error('Error deleting submission', ['error' => $e->getMessage()]);
             return response()->json(['error' => 'Submission not found'], 404);
         }
     }

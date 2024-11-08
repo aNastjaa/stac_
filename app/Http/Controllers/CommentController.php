@@ -13,8 +13,12 @@ class CommentController extends Controller
 {
     /**
      * Store a newly created comment in storage.
+     *
+     * @param  string  $postId
+     * @param  StoreCommentRequest  $request
+     * @return JsonResponse
      */
-    public function store($postId, StoreCommentRequest $request): JsonResponse
+    public function store(string $postId, StoreCommentRequest $request): JsonResponse
     {
         // Ensure the user is authenticated
         $user = Auth::user();
@@ -35,8 +39,11 @@ class CommentController extends Controller
 
     /**
      * Display a listing of comments for a specific artwork.
+     *
+     * @param  string  $postId
+     * @return JsonResponse
      */
-    public function index($postId): JsonResponse
+    public function index(string $postId): JsonResponse
     {
         $comments = Comment::with('user')->where('post_id', $postId)->get();
         return response()->json($comments);
@@ -44,10 +51,15 @@ class CommentController extends Controller
 
     /**
      * Update the specified comment in storage.
-    */
-    public function update(Request $request, $id): JsonResponse
+     *
+     * @param  Request  $request
+     * @param  string  $commentId
+     * @return JsonResponse
+     */
+    public function update(Request $request, string $postId, string $commentId): JsonResponse
     {
-        $comment = Comment::findOrFail($id);
+        // Fetch the comment by both postId and commentId
+        $comment = Comment::where('post_id', $postId)->where('id', $commentId)->firstOrFail();
 
         // Ensure the user is the owner of the comment
         if ($comment->user_id !== Auth::id()) {
@@ -66,10 +78,14 @@ class CommentController extends Controller
 
     /**
      * Remove the specified comment from storage.
+     *
+     * @param  string  $postId
+     * @param  string  $commentId
+     * @return JsonResponse
      */
-    public function destroy($id): JsonResponse
+    public function destroy(string $postId, string $commentId): JsonResponse
     {
-        $comment = Comment::findOrFail($id);
+        $comment = Comment::where('post_id', $postId)->where('id', $commentId)->firstOrFail();
 
         // Ensure the user is the owner of the comment
         if ($comment->user_id !== Auth::id()) {
@@ -77,6 +93,7 @@ class CommentController extends Controller
         }
 
         $comment->delete();
+
         return response()->json(['message' => 'Comment deleted successfully']);
     }
 }

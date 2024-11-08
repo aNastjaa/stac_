@@ -29,7 +29,6 @@ class CreateUserProfilesTable extends Migration
             // Foreign key to uploads table
             $table->uuid('avatar_id')->nullable();
             $table->foreign('avatar_id')->references('id')->on('uploads')->onDelete('set null');
-            $table->json('external_links')->nullable(); // JSON field for external links
 
             // Timestamps
             $table->timestamps();

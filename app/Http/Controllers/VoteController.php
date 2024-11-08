@@ -10,8 +10,13 @@ class VoteController extends Controller
 {
     /**
      * Store a vote for a specific submission.
+     *
+     * @param  Request  $request
+     * @param  string  $challengeId
+     * @param  string  $submissionId
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request, $challengeId, $submissionId)
+    public function store(Request $request, string $challengeId, string $submissionId)
     {
         $userId = Auth::id();
 
@@ -31,27 +36,43 @@ class VoteController extends Controller
 
     /**
      * Get all votes for a specific submission.
+     *
+     * @param  string  $challengeId
+     * @param  string  $submissionId
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function index($challengeId, $submissionId)
+    public function index(string $challengeId, string $submissionId)
     {
-        $votes = Vote::where('submission_id', $submissionId)->with('user')->get();
+        // Get all votes for the submission, including user data
+        $votes = Vote::where('submission_id', $submissionId)
+            ->with('user') // Assuming you have a relationship defined for 'user' in the Vote model
+            ->get();
+
         return response()->json($votes);
     }
 
     /**
      * Delete a vote for a specific submission.
+     *
+     * @param  string  $challengeId
+     * @param  string  $submissionId
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy($challengeId, $submissionId)
+    public function destroy(string $challengeId, string $submissionId)
     {
         $userId = Auth::id();
 
+        // Find the vote the user has placed for the specific submission
         $vote = Vote::where('user_id', $userId)->where('submission_id', $submissionId)->first();
 
+        // If the vote does not exist, return an error
         if (!$vote) {
             return response()->json(['error' => 'Vote not found'], 404);
         }
 
+        // Delete the vote
         $vote->delete();
+
         return response()->json(['message' => 'Vote deleted successfully'], 200);
     }
 }

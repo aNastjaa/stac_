@@ -14,6 +14,9 @@ class PostController extends Controller
 {
     /**
      * Store a newly created post in storage.
+     *
+     * @param  StorePostRequest  $request
+     * @return JsonResponse
      */
     public function store(StorePostRequest $request): JsonResponse
     {
@@ -27,15 +30,10 @@ class PostController extends Controller
         // Log user information for debugging
         Log::info('Authenticated User:', ['user' => $user]);
 
-        // Fetch the current theme
+        // Fetch the current theme (if exists)
         $currentTheme = Theme::where('start_date', '<=', now())
             ->orderBy('start_date', 'desc')
-            ->first();
-
-        // Check if a current theme exists
-        if (!$currentTheme) {
-            return response()->json(['message' => 'No active theme found'], 404);
-        }
+            ->firstOrFail();
 
         // Create the post
         $post = Post::create([
@@ -50,28 +48,37 @@ class PostController extends Controller
 
     /**
      * Display a listing of the posts.
+     *
+     * @return JsonResponse
      */
     public function index(): JsonResponse
     {
-        $posts = Post::with(['user', 'theme'])->get(); // Load relationships
+        $posts = Post::with(['user', 'theme'])->get(); // Load relationships efficiently
         return response()->json($posts);
     }
 
     /**
      * Display the specified post.
+     *
+     * @param  string  $postId  The ID of the post
+     * @return JsonResponse
      */
-    public function show($id): JsonResponse
+    public function show(string $postId): JsonResponse
     {
-        $post = Post::with(['user', 'theme'])->findOrFail($id);
+        $post = Post::with(['user', 'theme'])->findOrFail($postId);
         return response()->json($post);
     }
 
     /**
      * Update the specified post in storage.
+     *
+     * @param  UpdatePostRequest  $request
+     * @param  string  $postId  The ID of the post
+     * @return JsonResponse
      */
-    public function update(UpdatePostRequest $request, $id): JsonResponse
+    public function update(UpdatePostRequest $request, string $postId): JsonResponse
     {
-        $post = Post::findOrFail($id);
+        $post = Post::findOrFail($postId);
 
         // Ensure the user is the owner of the post
         if ($post->user_id !== Auth::id()) {
@@ -87,10 +94,13 @@ class PostController extends Controller
 
     /**
      * Remove the specified post from storage.
+     *
+     * @param  string  $postId  The ID of the post
+     * @return JsonResponse
      */
-    public function destroy($id): JsonResponse
+    public function destroy(string $postId): JsonResponse
     {
-        $post = Post::findOrFail($id);
+        $post = Post::findOrFail($postId);
 
         // Ensure the user is the owner of the post
         if ($post->user_id !== Auth::id()) {

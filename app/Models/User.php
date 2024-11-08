@@ -86,7 +86,7 @@ class User extends Authenticatable
     }
 
      /**
-     * Relationship with Submission model.
+     * Relationship with SponsorSubmission model.
      */
     public function sponsorSubmissions()
     {
@@ -99,10 +99,13 @@ class User extends Authenticatable
      * @param string $roleName
      * @return bool
      */
-    public function hasRole($roleName)
+    public function hasRole($roleName): bool
     {
         if ($this->role) {
-            Log::info('Checking role', ['role' => $this->role->name]);
+            Log::info('Checking role for user', [
+                'user_id' => $this->id,
+                'role' => $this->role->name
+            ]);
             return $this->role->name === $roleName;
         }
 
@@ -111,16 +114,21 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if the user is an admin by role name.
+     * Check if the user is an admin.
      *
      * @return bool
      */
-    public function isAdmin()
+    public function isAdmin(): bool
     {
         return $this->hasRole('admin');
     }
 
-    public function isPro()
+    /**
+     * Check if the user is a pro user.
+     *
+     * @return bool
+     */
+    public function isPro(): bool
     {
         return $this->hasRole('pro');
     }

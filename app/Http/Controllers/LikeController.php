@@ -7,15 +7,27 @@ use App\Models\Post;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class LikeController extends Controller
 {
     /**
      * Add a like to the specified artwork.
+     *
+     * @param  Request  $request
+     * @param  string  $id  The UUID of the post being liked.
+     * @return JsonResponse
      */
-    public function store(Request $request, $id): JsonResponse
+    public function store(Request $request, string $id): JsonResponse
     {
         $post = Post::findOrFail($id);
+
+        // Check if the user has already liked this post
+        $existingLike = Like::where('user_id', Auth::id())->where('post_id', $post->id)->first();
+        if ($existingLike) {
+            return response()->json(['message' => 'You have already liked this post.'], 400);
+        }
+
         $like = new Like([
             'user_id' => Auth::id(),  // Automatically use the authenticated user's ID
             'post_id' => $post->id,
@@ -27,21 +39,32 @@ class LikeController extends Controller
 
     /**
      * Get all likes for the specified artwork.
+     *
+     * @param  string  $id  The UUID of the post whose likes are being retrieved.
+     * @return JsonResponse
      */
-    public function index($id): JsonResponse
+    public function index(string $id): JsonResponse
     {
         $post = Post::findOrFail($id);
-        $likes = $post->likes; // Assuming you have defined a relationship in the Post model
+        $likes = $post->likes;
 
         return response()->json($likes);
     }
 
     /**
      * Remove a like from the specified artwork.
+     *
+     * @param string $postId
+     * @param  string  $likeId
+     * @return JsonResponse
      */
-    public function destroy($id): JsonResponse
+    public function destroy(string $postId, string $likeId): JsonResponse
     {
-        $like = Like::findOrFail($id);
+        Log::info('Attempting to delete like with ID: ' . $likeId);
+
+        $like = Like::findOrFail($likeId);
+
+        Log::info('Found like: ', ['like' => $like]);
 
         // Ensure the user is the owner of the like
         if ($like->user_id !== Auth::id()) {
@@ -49,7 +72,8 @@ class LikeController extends Controller
         }
 
         $like->delete();
-        return response()->json(null, 204);
+        //return response()->json(['message' => 'Like successfully deleted'], 200);
+        return response()->json([], 204);
     }
-}
 
+}
