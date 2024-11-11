@@ -24,6 +24,7 @@ Route::prefix('auth')->group(function () {
 // Authenticated Routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('/auth/logout', [AuthController::class, 'logout'])->name('auth.logout');
+    Route::put('/auth/update', [AuthController::class, 'update'])->name('auth.update');
     Route::delete('/auth/delete', [AuthController::class, 'destroy'])->name('auth.delete');
 
 

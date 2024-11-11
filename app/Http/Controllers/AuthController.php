@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Http\JsonResponse;
-use Symfony\Component\HttpKernel\Profiler\Profile;
+use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
 {
@@ -30,7 +30,14 @@ class AuthController extends Controller
         $fields = $request->validate([
             'username' => 'required|string|min:3|max:16|regex:/^[\S]+$/|unique:users',
             'email' => 'required|string|max:255|unique:users',
-            'password' => 'required|string|min:8',
+            'password' => [
+                'nullable',
+                'string',
+                Password::min(8)
+                ->mixedCase()
+                ->numbers()->symbols()
+                ->uncompromised(),
+            ],
         ]);
 
         $basicRoleId = DB::table('roles')->where('name', 'basic')->value('id');
@@ -96,6 +103,63 @@ class AuthController extends Controller
 
         return response()->json(['message' => 'You are logged out.']);
     }
+
+    /**
+     * Update the authenticated user's email or password.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function update(Request $request): JsonResponse
+    {
+        // Retrieve the authenticated user by ID
+        $user = User::find(Auth::id());
+
+        // Check if the user is authenticated
+        if (!$user) {
+            return response()->json(['message' => 'User not authenticated.'], 401);
+        }
+
+        // Validate email and password fields separately
+        $validatedData = $request->validate([
+            'email' => 'nullable|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => [
+                'nullable',
+                'string',
+                Password::min(8)
+                ->mixedCase()
+                ->numbers()->symbols()
+                ->uncompromised(),
+            ],
+        ]);
+
+        // Initialize response messages
+        $responseMessage = [];
+
+        // Update email if provided
+        if ($request->filled('email')) {
+            $user->email = $validatedData['email'];
+            $responseMessage['email'] = 'Email has been updated successfully.';
+        }
+
+        // Update password if provided
+        if ($request->filled('password')) {
+            $user->password = Hash::make($validatedData['password']);
+            $responseMessage['password'] = 'Password has been updated successfully.';
+        }
+
+        // If neither email nor password was updated
+        if (empty($responseMessage)) {
+            return response()->json(['message' => 'No updates made.'], 200);
+        }
+
+        // Save the updated user data
+        $user->save();
+
+        // Return response with appropriate messages for email and password
+        return response()->json($responseMessage, 200);
+    }
+
     /**
      * Delete the logged-in user's account and all related data.
      *
