@@ -31,7 +31,7 @@ class RoleMiddleware
         }
 
         // Eager load the role relationship to avoid N+1 problem
-        $user->load('role'); // Assuming the relationship name is 'role'
+        $user->load('role');
 
         Log::info('Checking user role', ['user_id' => $user->id]);
 
@@ -44,7 +44,7 @@ class RoleMiddleware
         // Log when the user doesn't have the required role
         Log::warning('User does not have the required role', [
             'user_id' => $user->id,
-            'user_role' => $user->role->name ?? 'N/A', // Check if the role exists
+            'user_role' => $user->role->name ?? 'N/A',
             'expected_role' => $role,
         ]);
 
