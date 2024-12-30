@@ -15,6 +15,23 @@ use App\Http\Controllers\VoteController;
 use App\Http\Controllers\ArchiveController;
 use Illuminate\Support\Facades\Route;
 
+// Route::options('{any}', function () {
+//     return response()->json([], 204, [
+//         'Access-Control-Allow-Origin' => 'http://localhost:5173',
+//         'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
+//         'Access-Control-Allow-Headers' => 'Content-Type, X-Requested-With, X-XSRF-TOKEN, Authorization',
+//         'Access-Control-Allow-Credentials' => 'true',
+//     ]);
+// })->where('any', '.*');
+
+Route::get('/sanctum/csrf-cookie', function () {
+    return response()->json(['message' => 'CSRF cookie set']);
+});
+
+Route::get('/', function () {
+    return response()->json(['message' => 'Welcome to the API'], 200);
+});
+
 // Authentication Routes
 Route::prefix('auth')->group(function () {
     Route::post('/register', [AuthController::class, 'register'])->name('auth.register');

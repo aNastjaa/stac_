@@ -27,6 +27,12 @@ class AuthController extends Controller
      */
     public function register(Request $request): JsonResponse
     {
+
+        Log::info('Register endpoint accessed', [
+            'method' => $request->method(),
+            'payload' => $request->all(),
+        ]);
+
         $fields = $request->validate([
             'username' => 'required|string|min:3|max:16|regex:/^[\S]+$/|unique:users',
             'email' => 'required|string|max:255|unique:users',
@@ -58,50 +64,68 @@ class AuthController extends Controller
     }
 
     /**
-     * Login a user and generate a token.
+     * Login a user with either token or session.
      *
      * @param Request $request
      * @return JsonResponse
      */
-    public function login(Request $request): JsonResponse
-    {
-        $request->validate([
-            'email' => ['required', 'email', 'exists:users'],
-            'password' => ['required'],
-        ]);
+    public function login(Request $request)
+{
+    // Validate the request
+    $request->validate([
+        'email' => 'required|email',
+        'password' => 'required',
+        'remember_me' => 'boolean'
+    ]);
 
-        $user = User::where('email', $request->email)->first();
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'message' => 'The provided credentials are incorrect.'
-            ], 401);
-        }
-
-        $token = $user->createToken($user->username)->plainTextToken;
-
-        return response()->json([
-            'user' => $user,
-            'token' => $token,
-            'redirect_url' => '/api/users/profile',
-        ], 200);
+    // Attempt to log the user in using email and password
+    if (!Auth::attempt($request->only('email', 'password'))) {
+        return response()->json(['message' => 'Invalid login details'], 401);
     }
 
+    $user = $request->user(); // Get authenticated user
+
+    // If "remember me" is checked, create a session-based token
+    if ($request->remember_me) {
+        $token = $user->createToken('auth_token')->plainTextToken;
+
+        // Create a cookie with the token that lasts 7 days
+        $cookie = cookie('sanctum_token', $token, 60 * 24 * 7); // 7 days
+
+        // Return a response with the session and token
+        return response()->json([
+            'message' => 'Logged in successfully',
+            'user' => $user,
+        ])->withCookie($cookie);
+    }
+
+    // Otherwise, return a typical token
+    return response()->json([
+        'message' => 'Logged in successfully',
+        'token' => $user->createToken('auth_token')->plainTextToken,
+        'user' => $user,
+    ]);
+}
+
+
     /**
-     * Logout the user and invalidate their token.
+     * Logout the user from session and invalidate their token if any.
      *
      * @param Request $request
      * @return JsonResponse
      */
     public function logout(Request $request): JsonResponse
     {
-        // Invalidate all user tokens
-        $request->user()->tokens()->delete();
+        if ($request->user()) {
+            // Invalidate all user tokens
+            $request->user()->tokens()->delete();
+        }
 
-        // Log out the user from the session if any
+        // Logout from session-based auth
         Auth::logout();
+        Log::info('User logged out.');
 
-        return response()->json(['message' => 'You are logged out.']);
+        return response()->json(['message' => 'You are logged out.'], 200);
     }
 
     /**
