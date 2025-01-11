@@ -18,7 +18,7 @@ class CreatePostsTable extends Migration
             $table->uuid('id')->primary();
             $table->uuid('user_id'); // Assuming you have a foreign key for the users table
             $table->uuid('theme_id'); // Foreign key to the themes table
-            $table->string('image_url');
+            $table->string('image_path');
             $table->text('description');
             $table->timestamps();
 

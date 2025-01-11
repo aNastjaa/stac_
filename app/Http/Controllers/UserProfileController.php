@@ -7,6 +7,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
+use App\Models\Upload;
 
 class UserProfileController extends Controller
 {
@@ -28,20 +30,34 @@ class UserProfileController extends Controller
     /**
      * Display a specific user's profile.
      *
-     * @param  string  $id
+     * @param  string  $profileId
      * @return JsonResponse
      */
-    public function show(string $id): JsonResponse
+    public function show(string $profileId): JsonResponse
     {
-        $profile = UserProfile::find($id);
-
+        $profile = UserProfile::find($profileId);
+    
         if (!$profile) {
             return response()->json(['error' => 'Profile not found.'], 404);
         }
-
-        return response()->json(['profile' => $profile], 200);
+    
+        // Get the avatar associated with this profile (if any)
+        $avatarUrl = null;
+        if ($profile->avatar_id) {
+            // Fetch the avatar from the uploads table
+            $upload = Upload::find($profile->avatar_id);
+    
+            if ($upload) {
+                $avatarUrl = Storage::url('avatar/' . $upload->file_url);
+            }
+        }
+    
+        return response()->json([
+            'profile' => $profile,
+            'avatar_url' => $avatarUrl,
+        ], 200);
     }
-
+    
     /**
      * Store a newly created profile for the authenticated user, deleting any previous profile.
      *
@@ -94,12 +110,14 @@ class UserProfileController extends Controller
             'external_links' => 'nullable|array',
         ]);
 
+        // Fetch the user's profile by user ID (as they are associated with a user)
         $userProfile = UserProfile::where('user_id', $request->user()->id)->first();
 
         if (!$userProfile) {
             return response()->json(['error' => 'Profile not found.'], 404);
         }
 
+        // Update the profile with validated data
         $userProfile->update($validatedData);
 
         return response()->json(['message' => 'Profile updated successfully.', 'profile' => $userProfile], 200);

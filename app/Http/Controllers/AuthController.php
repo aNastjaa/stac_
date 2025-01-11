@@ -26,23 +26,20 @@ class AuthController extends Controller
      * @return JsonResponse
      */
     public function register(Request $request): JsonResponse
-    {
-
-        Log::info('Register endpoint accessed', [
-            'method' => $request->method(),
-            'payload' => $request->all(),
-        ]);
-
+{
+   
+    try {
         $fields = $request->validate([
             'username' => 'required|string|min:3|max:16|regex:/^[\S]+$/|unique:users',
             'email' => 'required|string|max:255|unique:users',
             'password' => [
-                'nullable',
+                'required',
                 'string',
                 Password::min(8)
-                ->mixedCase()
-                ->numbers()->symbols()
-                ->uncompromised(),
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+                    ->uncompromised(),
             ],
         ]);
 
@@ -52,62 +49,80 @@ class AuthController extends Controller
         // Create the user
         $user = User::create($fields);
 
-        // Create the token for the user
-        $token = $user->createToken($request->username)->plainTextToken;
-
         Log::info('New User Created:', ['user' => $user->toArray()]);
 
         return response()->json([
             'user' => $user,
-            'token' => $token,
         ], 201);
-    }
 
-    /**
-     * Login a user with either token or session.
-     *
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function login(Request $request)
-{
-    // Validate the request
-    $request->validate([
-        'email' => 'required|email',
-        'password' => 'required',
-        'remember_me' => 'boolean'
-    ]);
-
-    // Attempt to log the user in using email and password
-    if (!Auth::attempt($request->only('email', 'password'))) {
-        return response()->json(['message' => 'Invalid login details'], 401);
-    }
-
-    $user = $request->user(); // Get authenticated user
-
-    // If "remember me" is checked, create a session-based token
-    if ($request->remember_me) {
-        $token = $user->createToken('auth_token')->plainTextToken;
-
-        // Create a cookie with the token that lasts 7 days
-        $cookie = cookie('sanctum_token', $token, 60 * 24 * 7); // 7 days
-
-        // Return a response with the session and token
+    } catch (\Illuminate\Validation\ValidationException $e) {
+        Log::error('Validation Error:', ['errors' => $e->errors()]);
         return response()->json([
-            'message' => 'Logged in successfully',
-            'user' => $user,
-        ])->withCookie($cookie);
+            'message' => 'Validation Error',
+            'errors' => $e->errors(),
+        ], 422); // Unprocessable Entity status
+    } catch (\Exception $e) {
+        Log::error('Unexpected Error:', ['error' => $e->getMessage()]);
+        return response()->json([
+            'message' => 'An unexpected error occurred. Please try again later.',
+        ], 500); // Internal Server Error
     }
-
-    // Otherwise, return a typical token
-    return response()->json([
-        'message' => 'Logged in successfully',
-        'token' => $user->createToken('auth_token')->plainTextToken,
-        'user' => $user,
-    ]);
 }
 
 
+/**
+ * Login a user with either token or session.
+ *
+ * @param Request $request
+ * @return JsonResponse
+ */
+public function login(Request $request): JsonResponse
+    {
+
+        Log::info('Login function accessed', ['request_headers' => $request->headers->all()]);
+        
+        try {
+            $fields = $request->validate([
+                'email' => 'required|email',
+                'password' => 'required',
+                'remember_me' => 'boolean',
+            ]);
+
+            // Attempt to authenticate the user
+            if (!Auth::attempt($request->only('email', 'password'))) {
+                return response()->json(['message' => 'Invalid login details'], 401);
+            }
+
+            $user = $request->user();
+
+            // Handle 'remember me' functionality if provided
+            if ($fields['remember_me'] ?? false) {
+               $token = $user->createToken('auth_token')->plainTextToken;
+                $cookie = cookie('sanctum_token');
+
+                return response()->json([
+                    'message' => 'Logged in successfully',
+                    'user' => $user,
+                    'token' => $token
+                ])->withCookie($cookie);
+            }
+
+            return response()->json([
+                'message' => 'Logged in successfully',
+                'token' => $user->createToken('auth_token')->plainTextToken,
+                'user' => $user,
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'message' => 'Validation Error',
+                'errors' => $e->errors(),
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An unexpected error occurred. Please try again later.',
+            ], 500);
+        }
+    }
     /**
      * Logout the user from session and invalidate their token if any.
      *

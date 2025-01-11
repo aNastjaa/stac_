@@ -16,8 +16,10 @@
     return [
         'paths' => ['api/*', 'sanctum/csrf-cookie'], // Define paths for CORS
         'allowed_methods' => ['*'], // Allow all HTTP methods
-        'allowed_origins' => ['http://localhost:5173'], // Specify your frontend URL
+        'allowed_origins' => ['http://localhost:5173'], 
         'allowed_origins_patterns' => [],
+        'access-control-allow-origins' => ['*'],
+        'access-control-allow-credentials' => true,
         'allowed_headers' => ['Content-Type', 'X-Requested-With', 'X-XSRF-TOKEN', 'Authorization'],
         'exposed_headers' => [],
         'max_age' => 0,

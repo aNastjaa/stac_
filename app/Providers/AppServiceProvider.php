@@ -23,13 +23,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Log::info('Request received', [
-            'url' => request()->fullUrl(),
-            'method' => request()->method(),
-            'headers' => request()->headers->all(),
-        ]);
-            // Adding a preflight OPTIONS route for CORS
-            Route::options('/{any}', function () {
+        // Adding a preflight OPTIONS route for CORS
+        Route::options('/{any}', function () {
                 return response()->json([], 204);
             })->where('any', '.*');
     }

@@ -14,22 +14,10 @@ use App\Http\Controllers\SponsorSubmissionController;
 use App\Http\Controllers\VoteController;
 use App\Http\Controllers\ArchiveController;
 use Illuminate\Support\Facades\Route;
-
-// Route::options('{any}', function () {
-//     return response()->json([], 204, [
-//         'Access-Control-Allow-Origin' => 'http://localhost:5173',
-//         'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
-//         'Access-Control-Allow-Headers' => 'Content-Type, X-Requested-With, X-XSRF-TOKEN, Authorization',
-//         'Access-Control-Allow-Credentials' => 'true',
-//     ]);
-// })->where('any', '.*');
+use App\Http\Middleware\LogCsrfTokens;
 
 Route::get('/sanctum/csrf-cookie', function () {
-    return response()->json(['message' => 'CSRF cookie set']);
-});
-
-Route::get('/', function () {
-    return response()->json(['message' => 'Welcome to the API'], 200);
+    return response()->json();
 });
 
 // Authentication Routes
@@ -49,8 +37,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::prefix('users')->group(function () {
         Route::post('/profile', [UserProfileController::class, 'store'])->name('profile.create');
         Route::get('/profile', [UserProfileController::class, 'index'])->name('profile.index');
-        Route::get('/profile/{id}', [UserProfileController::class, 'show'])->name('profile.show');
-        Route::delete('/profile/{id}', [UserProfileController::class, 'destroy'])->name('profile.destroy');
+        Route::get('/profile/{profileId}', [UserProfileController::class, 'show'])->name('profile.show');
+        Route::delete('/profile/{profileId}', [UserProfileController::class, 'destroy'])->name('profile.destroy');
         Route::put('/profile', [UserProfileController::class, 'update'])->name('profile.update');
     });
 
