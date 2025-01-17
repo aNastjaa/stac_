@@ -48,7 +48,7 @@ class UserProfileController extends Controller
     
             if ($upload) {
                 // Generate the full URL for the avatar
-                $avatarUrl = Storage::url($upload->file_url);  // Correct URL generation
+                $avatarUrl = $upload->file_url;
             }
         }
     
