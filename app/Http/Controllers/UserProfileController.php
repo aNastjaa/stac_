@@ -41,20 +41,20 @@ class UserProfileController extends Controller
             return response()->json(['error' => 'Profile not found.'], 404);
         }
     
-        // Get the avatar associated with this profile (if any)
+        // Fetch the avatar URL only if avatar_id is set
         $avatarUrl = null;
         if ($profile->avatar_id) {
-            // Fetch the avatar from the uploads table
             $upload = Upload::find($profile->avatar_id);
     
             if ($upload) {
-                $avatarUrl = Storage::url('avatar/' . $upload->file_url);
+                // Generate the full URL for the avatar
+                $avatarUrl = Storage::url($upload->file_url);  // Correct URL generation
             }
         }
     
         return response()->json([
             'profile' => $profile,
-            'avatar_url' => $avatarUrl,
+            'avatar_url' => $avatarUrl, 
         ], 200);
     }
     
@@ -76,6 +76,7 @@ class UserProfileController extends Controller
             'full_name' => 'required|string|max:255',
             'bio' => 'nullable|string',
             'external_links' => 'nullable|array',
+            'avatar_id' => 'nullable|uuid|exists:uploads,id', // Allow optional avatar_id
         ]);
 
         // Delete any existing profile for the user
@@ -87,6 +88,7 @@ class UserProfileController extends Controller
                 'full_name' => $validatedData['full_name'],
                 'bio' => $validatedData['bio'],
                 'external_links' => $validatedData['external_links'],
+                'avatar_id' => $validatedData['avatar_id'],
             ]);
 
             return response()->json(['profile' => $profile], 201);
@@ -108,21 +110,26 @@ class UserProfileController extends Controller
             'full_name' => 'nullable|string|max:255',
             'bio' => 'nullable|string',
             'external_links' => 'nullable|array',
+            'avatar_id' => 'nullable|uuid|exists:uploads,id',
         ]);
 
-        // Fetch the user's profile by user ID (as they are associated with a user)
+        // Fetch the user's profile by user ID (associated with the authenticated user)
         $userProfile = UserProfile::where('user_id', $request->user()->id)->first();
 
         if (!$userProfile) {
             return response()->json(['error' => 'Profile not found.'], 404);
         }
 
-        // Update the profile with validated data
+        // If there's a new avatar uploaded, update the avatar_id
+        if ($request->has('avatar_id')) {
+            $userProfile->avatar_id = $request->input('avatar_id');  // Update the avatar ID
+        }
+
+        // Update other profile fields
         $userProfile->update($validatedData);
 
         return response()->json(['message' => 'Profile updated successfully.', 'profile' => $userProfile], 200);
     }
-
     /**
      * Delete a specific user profile.
      *

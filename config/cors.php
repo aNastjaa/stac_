@@ -14,7 +14,7 @@
     */
 
     return [
-        'paths' => ['api/*', 'sanctum/csrf-cookie'], // Define paths for CORS
+        'paths' => ['api/*', 'sanctum/csrf-cookie', 'storage/*'], // Define paths for CORS
         'allowed_methods' => ['*'], // Allow all HTTP methods
         'allowed_origins' => ['http://localhost:5173'], 
         'allowed_origins_patterns' => [],

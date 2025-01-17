@@ -14,8 +14,8 @@ use App\Http\Controllers\SponsorSubmissionController;
 use App\Http\Controllers\VoteController;
 use App\Http\Controllers\ArchiveController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Middleware\LogCsrfTokens;
 
+// CSRF Cookie Route
 Route::get('/sanctum/csrf-cookie', function () {
     return response()->json();
 });
@@ -35,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // User Profile Routes
     Route::prefix('users')->group(function () {
+        Route::options('/{userId}/role', function () {return response()->json();});
         Route::post('/profile', [UserProfileController::class, 'store'])->name('profile.create');
         Route::get('/profile', [UserProfileController::class, 'index'])->name('profile.index');
         Route::get('/profile/{profileId}', [UserProfileController::class, 'show'])->name('profile.show');

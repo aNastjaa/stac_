@@ -55,6 +55,8 @@ class UploadController extends Controller
             'file_type' => 'brand_logo',
         ]);
 
+        
+
         return response()->json($upload, 201);
     }
 

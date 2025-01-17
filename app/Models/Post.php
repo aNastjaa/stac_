@@ -13,7 +13,7 @@ class Post extends Model
     protected $fillable = [
         'user_id',
         'theme_id',
-        'image_url',
+        'image_path',
         'description',
         'status',
     ];
@@ -32,6 +32,11 @@ class Post extends Model
                 $post->id = (string) Str::uuid();
                 $post->status = 'pending';
             }
+        });
+
+        static::retrieved(function ($post) {
+            $imagePath = $post->image_path;
+            $post->image_path = url($imagePath);
         });
     }
 

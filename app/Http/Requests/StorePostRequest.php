@@ -19,12 +19,11 @@ class StorePostRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules()
     {
         return [
-
-            'image_url' => 'required|url',
-            'description' => 'required|string',
+            'image' => 'required|image|mimes:jpg,jpeg,png,gif|max:10240', // Max file size 10MB
+            'description' => 'required|string|max:255',
         ];
     }
 }

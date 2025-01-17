@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class Upload extends Model
@@ -49,6 +50,11 @@ class Upload extends Model
                 $upload->id = (string) Str::uuid();
             }
         });
+
+        static::retrieved(function ($upload) {
+           
+            $upload->file_url = Storage::url($upload->file_url);
+        });
     }
 
     /**
@@ -56,8 +62,8 @@ class Upload extends Model
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */
-    public function userProfile(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(UserProfile::class);
-    }
+    // public function userProfile(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    // {
+    //     return $this->belongsTo(UserProfile::class);
+    // }
 }

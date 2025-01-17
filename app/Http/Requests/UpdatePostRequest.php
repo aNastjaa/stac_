@@ -24,6 +24,7 @@ class UpdatePostRequest extends FormRequest
         return [
             'image_url' => 'sometimes|required|url',
             'description' => 'sometimes|required|string|max:255',
+            'theme_id' => 'sometimes|required|exists:themes,id', 
         ];
     }
 }

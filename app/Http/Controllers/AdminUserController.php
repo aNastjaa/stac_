@@ -23,7 +23,7 @@ class AdminUserController extends Controller
             'username' => 'required|string|max:255|unique:users',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8',
-            'role' => 'sometimes|string|in:basic,pro,admin',
+            'role' => 'required|string|in:basic,pro,admin',
             'role_id' => 'sometimes|uuid|exists:roles,id',
         ]);
 
@@ -70,27 +70,31 @@ class AdminUserController extends Controller
      */
     public function updateRole(Request $request, string $userId): JsonResponse
     {
+        // Validate the role in the request
         $validator = Validator::make($request->all(), [
             'role' => 'required|string|in:basic,pro,admin',
         ]);
 
+        // If validation fails, return error response
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 422);
         }
 
+        // Find the user
         $user = User::findOrFail($userId);
 
-        // Fetch the role ID based on the role name from the request
+        // Fetch the role by name
         $role = Role::where('name', $request->role)->first();
 
         if (!$role) {
             return response()->json(['error' => 'Role not found.'], 404);
         }
 
-        // Update the user's role_id directly
+        // Update the user's role
         $user->role_id = $role->id;
         $user->save();
 
+        // Return the updated user information
         return response()->json(['message' => 'User role updated successfully', 'user' => $user]);
     }
 

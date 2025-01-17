@@ -24,7 +24,7 @@ class StoreUploadRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'file' => 'required|image|mimes:jpg,jpeg,png|max:2048',
+            'file' => 'required|image|mimes:jpg,jpeg,png|max:10240',
         ];
     }
 
@@ -37,7 +37,7 @@ class StoreUploadRequest extends FormRequest
             'file.required' => 'Please upload a file.',
             'file.image' => 'The file must be an image (jpg, jpeg, png).',
             'file.mimes' => 'Allowed file types are: jpg, jpeg, png.',
-            'file.max' => 'The file size should not exceed 2MB.',
+            'file.max' => 'The file size should not exceed 10MB.',
         ];
     }
 
