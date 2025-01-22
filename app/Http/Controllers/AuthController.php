@@ -132,23 +132,25 @@ class AuthController extends Controller
     }
     
     /**
-     * Logout the user from session and invalidate their token if any.
-     *
-     * @param Request $request
-     * @return JsonResponse
-     */
+ * Logout the user by deleting their tokens.
+ *
+ * @param Request $request
+ * @return JsonResponse
+ */
     public function logout(Request $request): JsonResponse
     {
-        if ($request->user()) {
-            // Invalidate all user tokens
-            $request->user()->tokens()->delete();
+        try {
+            if ($request->user()) {
+                // Revoke all tokens for the user
+                $request->user()->tokens()->delete();
+                Log::info('User logged out successfully.', ['user_id' => $request->user()->id]);
+            }
+
+            return response()->json(['message' => 'You are logged out.'], 200);
+        } catch (\Exception $e) {
+            Log::error('Error during logout:', ['error' => $e->getMessage()]);
+            return response()->json(['message' => 'An error occurred while logging out.'], 500);
         }
-
-        // Logout from session-based auth
-        Auth::logout();
-        Log::info('User logged out.');
-
-        return response()->json(['message' => 'You are logged out.'], 200);
     }
 
     /**

@@ -72,7 +72,12 @@ class PostController extends Controller
     public function index(): JsonResponse
     {
         try {
-            $posts = Post::with(['user', 'theme'])->get(); // Get all posts regardless of status
+            // Fetch posts with user and theme relationships
+            $posts = Post::with(['user:id,username', 'theme:id,theme_name']) // Load specific fields for user and theme
+                ->where('status', 'accepted') // Only include accepted posts
+                ->get();
+
+            // Return the posts in a structured response
             return response()->json($posts);
         } catch (\Exception $e) {
             Log::error('Error fetching posts: ', ['error' => $e->getMessage()]);

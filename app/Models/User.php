@@ -77,6 +77,11 @@ class User extends Authenticatable
         return $this->hasOne(UserProfile::class, 'user_id', 'id');
     }
 
+    public function avatar()
+    {
+        return $this->hasOne(Upload::class)->where('file_type', 'avatar');
+    }
+
     /**
      * Relationship with Post model.
      */
