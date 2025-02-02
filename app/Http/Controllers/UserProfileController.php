@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comment;
+use App\Models\Like;
+use App\Models\Post;
 use App\Models\UserProfile;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

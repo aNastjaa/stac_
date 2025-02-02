@@ -76,4 +76,20 @@ class LikeController extends Controller
         return response()->json([], 204);
     }
 
+    /**
+     * Check if the authenticated user has liked the specified artwork.
+     *
+     * @param string $id  The UUID of the post being checked.
+     * @return JsonResponse
+     */
+    public function checkIfUserLikedPost(string $id): JsonResponse
+    {
+        $post = Post::findOrFail($id);
+
+        // Check if the user has liked this post
+        $liked = Like::where('user_id', Auth::id())->where('post_id', $post->id)->exists();
+
+        return response()->json(['liked' => $liked]);
+    }
+
 }

@@ -73,8 +73,9 @@ class PostController extends Controller
     {
         try {
             // Fetch posts with user and theme relationships
-            $posts = Post::with(['user:id,username', 'theme:id,theme_name']) // Load specific fields for user and theme
-                ->where('status', 'accepted') // Only include accepted posts
+            $posts = Post::with(['user:id,username', 'theme:id,theme_name'])
+                ->withCount(['comments', 'likes']) 
+                ->where('status', 'accepted')
                 ->get();
 
             // Return the posts in a structured response
@@ -93,13 +94,31 @@ class PostController extends Controller
     public function show(string $postId): JsonResponse
     {
         try {
-            $post = Post::with(['user', 'theme'])->findOrFail($postId);
-            return response()->json($post);
+            // Fetch the post with necessary relationships and counts
+            $post = Post::with(['user', 'theme'])
+                ->withCount(['comments', 'likes'])
+                ->findOrFail($postId);
+
+            // Format the response
+            $response = [
+                'id' => $post->id,
+                'imageUrl' => $post->image_url,
+                'description' => $post->description,
+                'username' => $post->user->username,
+                'userId' => $post->user->id,
+                'themeName' => $post->theme->theme_name,
+                'likes_count' => $post->likes_count,
+                'comments_count' => $post->comments_count,
+                'createdAt' => $post->created_at->toISOString(),
+            ];
+
+            return response()->json($response);
         } catch (\Exception $e) {
             Log::error('Error fetching post: ', ['error' => $e->getMessage()]);
             return response()->json(['message' => 'Post not found.'], 404);
         }
     }
+
 
     /**
      * Update the specified post in storage.

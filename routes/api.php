@@ -81,6 +81,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/', [LikeController::class, 'store'])->name('likes.store');
         Route::get('/', [LikeController::class, 'index'])->name('likes.index');
         Route::delete('/{likeId}', [LikeController::class, 'destroy'])->name('likes.destroy');
+        Route::get('/check', [LikeController::class, 'checkIfUserLikedPost'])->name('likes.check');
     });
 
     // Sponsor Challenges and Submissions Routes

@@ -20,11 +20,26 @@ class StoreSponsorSubmissionRequest extends FormRequest
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
-    public function rules(): array
+    public function rules()
     {
         return [
-            'image_url' => 'required|url',
-            'description' => 'required|string',
+            'image' => 'required|image|mimes:jpg,jpeg,png,gif|max:10240', // Max file size 10MB
+            'description' => 'required|string|max:255',
+        ];
+    }
+
+    /**
+     * Custom error messages
+     */
+    public function messages(): array
+    {
+        return [
+            'image.required' => 'The image file is required.',  // Fix this
+            'image.file' => 'The image must be a valid file.',
+            'image.mimes' => 'The image must be a file of type: jpeg, jpg, png, gif.', // Remove 'pdf'
+            'image.max' => 'The image may not be greater than 10MB.',
+            'description.required' => 'The description is required.',
+            'description.string' => 'The description must be a valid string.',
         ];
     }
 }

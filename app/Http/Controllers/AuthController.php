@@ -37,8 +37,7 @@ class AuthController extends Controller
                     Password::min(8)
                         ->mixedCase()
                         ->numbers()
-                        ->symbols()
-                        ->uncompromised(),
+                        ->symbols(),
                 ],
             ]);
 
