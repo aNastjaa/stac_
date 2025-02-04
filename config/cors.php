@@ -14,10 +14,11 @@
     */
 
     return [
-        'paths' => ['api/*', 'sanctum/csrf-cookie', 'storage/*'], // Define paths for CORS
-        'allowed_methods' => ['*'], // Allow all HTTP methods
+        'paths' => ['api/*', 'sanctum/csrf-cookie', 'storage/*'], 
+        'allowed_methods' => ['*'], 
         'allowed_origins' => ['http://localhost:5173'], 
         'allowed_origins_patterns' => [],
+        'access-control-allow-origins' => ['*'],
         'access-control-allow-credentials' => true,
         'allowed_headers' => ['Content-Type', 'X-Requested-With', 'X-XSRF-TOKEN', 'Authorization'],
         'exposed_headers' => [],

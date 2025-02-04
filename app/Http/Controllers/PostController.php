@@ -39,20 +39,20 @@ class PostController extends Controller
     
             // Validate and store the image via the validated request
             if (!$request->hasFile('image')) {
-                return response()->json(['message' => 'Image is required'], 422); // Error if no image is provided
+                return response()->json(['message' => 'Image is required'], 422); 
             }
     
             // Store the image in the public storage
             $image = $request->file('image');
-            $imagePath = $image->store('artworks', 'public'); // Store in 'public/artworks' folder
+            $imagePath = $image->store('artworks', 'public');
     
-            Log::info('Image stored at: ' . $imagePath);  // Log image path for debugging
+            Log::info('Image stored at: ' . $imagePath);  
     
             // Create the post with the uploaded image path
             $post = Post::create([
                 'user_id' => $user->id,
-                'theme_id' => $currentTheme->id, // Use the dynamic theme ID
-                'image_path' => Storage::url($imagePath), // Store the file URL/path
+                'theme_id' => $currentTheme->id,
+                'image_path' => Storage::url($imagePath), 
                 'description' => $request->description,
             ]);
     
@@ -75,7 +75,7 @@ class PostController extends Controller
             // Fetch posts with user and theme relationships
             $posts = Post::with(['user:id,username', 'theme:id,theme_name'])
                 ->withCount(['comments', 'likes']) 
-                ->where('status', 'accepted')
+                ->whereIn('status', ['accepted', 'pending'])
                 ->get();
 
             // Return the posts in a structured response

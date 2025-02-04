@@ -34,9 +34,9 @@ class StoreSponsorSubmissionRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'image.required' => 'The image file is required.',  // Fix this
+            'image.required' => 'The image file is required.', 
             'image.file' => 'The image must be a valid file.',
-            'image.mimes' => 'The image must be a file of type: jpeg, jpg, png, gif.', // Remove 'pdf'
+            'image.mimes' => 'The image must be a file of type: jpeg, jpg, png, gif.',
             'image.max' => 'The image may not be greater than 10MB.',
             'description.required' => 'The description is required.',
             'description.string' => 'The description must be a valid string.',

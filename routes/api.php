@@ -109,8 +109,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Archive Routes
     Route::prefix('archive')->group(function () {
-        Route::post('/move', [ArchiveController::class, 'moveToArchive'])->middleware('role:admin')->name('archive.move'); // Only admin can move posts
-        Route::get('/posts', [ArchiveController::class, 'viewArchivedPosts'])->name('archive.posts'); // Accessible to all users
+        Route::post('/move', [ArchiveController::class, 'moveToArchive'])->middleware('role:admin')->name('archive.move');
+        Route::get('/posts', [ArchiveController::class, 'viewArchivedPosts'])->name('archive.posts'); 
+        Route::get('/archived-themes', [ArchiveController::class, 'viewArchivedThemes'])->name('archive.themes');
     });
 
 

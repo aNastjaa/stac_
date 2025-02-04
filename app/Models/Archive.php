@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Str;
 use App\Models\Post;
+use App\Models\Theme;
 
 class Archive extends Model
 {
@@ -15,8 +16,9 @@ class Archive extends Model
 
     protected $fillable = [
         'post_id',
+        'theme_id',
+        'theme_name',
         'moved_at',
-        'theme',
     ];
 
     protected $keyType = 'string';
@@ -40,5 +42,15 @@ class Archive extends Model
     public function post(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(Post::class, 'post_id');
+    }
+
+    /**
+     * Define the relationship to the Theme model
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     */
+    public function theme(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Theme::class, 'theme_id');
     }
 }

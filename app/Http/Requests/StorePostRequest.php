@@ -26,4 +26,15 @@ class StorePostRequest extends FormRequest
             'description' => 'required|string|max:255',
         ];
     }
+
+    public function messages()
+{
+    return [
+        'image.required' => 'An image is required for artwork submission.',
+        'image.file' => 'The uploaded file must be a valid image.',
+        'image.mimes' => 'Only JPEG, PNG, JPG, and GIF formats are allowed.',
+        'image.max' => 'The image size must not exceed 10MB.',
+        'description.required' => 'The description is required.',
+    ];
+}
 }

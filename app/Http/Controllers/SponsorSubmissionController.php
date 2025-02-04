@@ -64,25 +64,23 @@ class SponsorSubmissionController extends Controller
     
             // Validate and store the image via the validated request
             if (!$request->hasFile('image')) {
-                return response()->json(['message' => 'Image is required'], 422); // Error if no image is provided
+                return response()->json(['message' => 'Image is required'], 422); 
             }
     
             // Store the image in the public storage
             $image = $request->file('image');
-            $imagePath = $image->store('submissions', 'public'); // Store in 'public/submissions' folder
-    
-            Log::info('Image stored at: ' . $imagePath);  // Log image path for debugging
+            $imagePath = $image->store('submissions', 'public'); 
     
             // Create the submission with the uploaded image path
             $submission = SponsorSubmission::create([
                 'user_id' => $user->id,
-                'challenge_id' => $request->challengeId, // Associate with challenge ID from the request
+                'challenge_id' => $request->challengeId, 
                 'description' => $request->description,
-                'image_path' => $imagePath, // Directly store the relative path
-                'status' => 'pending', // Default status as 'pending'
+                'image_path' => $imagePath, 
+                'status' => 'pending', 
             ]);
     
-            return response()->json($submission, 201); // Return the created submission with a 201 status code
+            return response()->json($submission, 201); 
         } catch (\Exception $e) {
             // Log the error if there's an issue
             Log::error('Error creating submission: ' . $e->getMessage());
@@ -111,7 +109,7 @@ class SponsorSubmissionController extends Controller
                 'user_id' => $submission->user_id,
                 'username' => $submission->user->username,
                 'avatar_url' => $submission->user->avatar_url,
-                'image_path' => Storage::url($submission->image_path), // Return the public URL of the stored file
+                'image_path' => Storage::url($submission->image_path),
                 'description' => $submission->description,
                 'status' => $submission->status,
                 'created_at' => $submission->created_at,

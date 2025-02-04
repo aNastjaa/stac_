@@ -4,30 +4,35 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-return new class extends Migration
+class CreateArchivesTable extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * @return void
      */
     public function up()
     {
         Schema::create('archives', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('post_id'); // Foreign key referencing posts
+            $table->uuid('post_id')->nullable(); // Foreign key for posts (nullable)
+            $table->uuid('theme_id'); // Foreign key for themes
+            $table->string('theme_name'); // Store theme name
             $table->timestamp('moved_at');
-            $table->string('theme');
             $table->timestamps();
 
-            // Define foreign key constraint
             $table->foreign('post_id')->references('id')->on('posts')->onDelete('cascade');
+            $table->foreign('theme_id')->references('id')->on('themes')->onDelete('cascade');
         });
     }
 
     /**
      * Reverse the migrations.
+     *
+     * @return void
      */
-    public function down(): void
+    public function down()
     {
-        Schema::dropIfExists('archive');
+        Schema::dropIfExists('archives');
     }
-};
+}
