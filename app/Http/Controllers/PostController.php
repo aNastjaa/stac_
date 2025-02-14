@@ -23,47 +23,42 @@ class PostController extends Controller
     public function store(StorePostRequest $request): JsonResponse
     {
         try {
-            // Ensure the user is authenticated
             $user = Auth::user();
             if (!$user) {
                 return response()->json(['message' => 'Unauthorized'], 401);
             }
-    
-            // Log user information for debugging
-            Log::info('Authenticated User:', ['user' => $user]);
     
             // Fetch the current theme (if exists)
             $currentTheme = Theme::where('start_date', '<=', now())
                 ->orderBy('start_date', 'desc')
                 ->firstOrFail();
     
-            // Validate and store the image via the validated request
-            if (!$request->hasFile('image')) {
-                return response()->json(['message' => 'Image is required'], 422); 
-            }
+            // ✅ Laravel handles validation via StorePostRequest, so no need for manual checks!
     
-            // Store the image in the public storage
+            // Store the image in public storage
             $image = $request->file('image');
             $imagePath = $image->store('artworks', 'public');
     
-            Log::info('Image stored at: ' . $imagePath);  
+            Log::info('Image stored at: ' . $imagePath);
     
             // Create the post with the uploaded image path
             $post = Post::create([
                 'user_id' => $user->id,
                 'theme_id' => $currentTheme->id,
-                'image_path' => Storage::url($imagePath), 
+                'image_path' => Storage::url($imagePath),
                 'description' => $request->description,
             ]);
     
-            return response()->json($post, 201);
+            return response()->json([
+                'message' => 'Artwork has been posted successfully!',
+                'post' => $post
+            ], 201);
         } catch (\Exception $e) {
-            // Log the error if there's an issue
             Log::error('Error creating post: ' . $e->getMessage());
             return response()->json(['message' => 'Internal Server Error'], 500);
         }
     }
-     
+    
     /**
      * Display a listing of the posts.
      *

@@ -3,6 +3,8 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Contracts\Validation\Validator;
+use Illuminate\Http\Exceptions\HttpResponseException;
 
 class StorePostRequest extends FormRequest
 {
@@ -28,13 +30,21 @@ class StorePostRequest extends FormRequest
     }
 
     public function messages()
-{
-    return [
-        'image.required' => 'An image is required for artwork submission.',
-        'image.file' => 'The uploaded file must be a valid image.',
-        'image.mimes' => 'Only JPEG, PNG, JPG, and GIF formats are allowed.',
-        'image.max' => 'The image size must not exceed 10MB.',
-        'description.required' => 'The description is required.',
-    ];
-}
+    {
+        return [
+            'image.required' => 'An image is required for artwork submission.',
+            'image.file' => 'The uploaded file must be a valid image.',
+            'image.mimes' => 'Only JPEG, PNG, JPG, and GIF formats are allowed.',
+            'image.max' => 'The image size must not exceed 10MB.',
+            'description.required' => 'The description is required.',
+        ];
+    }
+
+    public function failedValidation(Validator $validator)
+    {
+        throw new HttpResponseException(response()->json([
+            'message' => 'Validation failed',
+            'errors' => $validator->errors()
+        ], 422));
+    }
 }

@@ -60,21 +60,24 @@ class LikeController extends Controller
      */
     public function destroy(string $postId, string $likeId): JsonResponse
     {
+        Log::info('Authenticated User ID:', ['auth_id' => Auth::id()]);
         Log::info('Attempting to delete like with ID: ' . $likeId);
-
+    
         $like = Like::findOrFail($likeId);
-
-        Log::info('Found like: ', ['like' => $like]);
-
-        // Ensure the user is the owner of the like
+        Log::info('Found like:', ['like' => $like]);
+    
         if ($like->user_id !== Auth::id()) {
+            Log::warning('Unauthorized like deletion attempt', [
+                'like_id' => $likeId,
+                'user_id' => Auth::id(),
+                'expected_user' => $like->user_id,
+            ]);
             return response()->json(['message' => 'Unauthorized'], 403);
         }
-
+    
         $like->delete();
-        //return response()->json(['message' => 'Like successfully deleted'], 200);
         return response()->json([], 204);
-    }
+    }    
 
     /**
      * Check if the authenticated user has liked the specified artwork.
